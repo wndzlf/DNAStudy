@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DNA to Protein Fold Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+  </head>
+  <body>
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+
+    <main class="page">
+      <header class="hero">
+        <p class="eyebrow">교육용 분자생물학 시각화</p>
+        <h1>DNA -> 전사 -> 코돈 -> 단백질 접힘</h1>
+        <p>
+          실제 인류가 해독한 유전자(Ensembl canonical transcript)와 AlphaFold 공식 모델을 연결해
+          단백질이 만들어지고 접히는 과정을 한 화면에서 학습합니다.
+        </p>
+      </header>
+
+      <section class="panel controls">
+        <div class="control-row">
+          <label for="gene-select">유전자/단백질 선택</label>
+          <select id="gene-select"></select>
+        </div>
+        <p id="catalog-meta" class="muted"></p>
+        <p id="gene-summary" class="muted"></p>
+      </section>
+
+      <section class="pipeline-grid">
+        <article class="panel step-card">
+          <h2>1) DNA (Coding Sequence, CDS)</h2>
+          <p class="meta" id="dna-meta"></p>
+          <div class="edu-note">
+            <p>핵심 개념</p>
+            <ul>
+              <li>CDS는 단백질로 실제 번역되는 염기서열 구간입니다.</li>
+              <li>5' -> 3' 방향으로 읽으며 보통 시작코돈 `ATG`로 시작합니다.</li>
+              <li>말단에는 보통 종결코돈(`TAA`, `TAG`, `TGA`)이 있습니다.</li>
+            </ul>
+          </div>
+          <pre id="dna-seq" class="sequence-box"></pre>
+        </article>
+
+        <article class="panel step-card">
+          <h2>2) mRNA (Transcription)</h2>
+          <p class="meta" id="mrna-meta"></p>
+          <div class="edu-note">
+            <p>핵심 개념</p>
+            <ul>
+              <li>실제 세포에서는 RNA polymerase가 pre-mRNA를 합성하고 가공합니다.</li>
+              <li>이 앱은 교육용 단순화로 CDS의 `T`를 `U`로 바꿔 mRNA를 표시합니다.</li>
+              <li>mRNA는 이후 리보솜에서 코돈 단위로 읽힙니다.</li>
+            </ul>
+          </div>
+          <pre id="mrna-seq" class="sequence-box"></pre>
+        </article>
+
+        <article class="panel step-card">
+          <h2>3) Codon</h2>
+          <p class="meta" id="codon-meta"></p>
+          <div class="edu-note">
+            <p>핵심 개념</p>
+            <ul>
+              <li>코돈은 3개 염기 묶음이며 아미노산 1개와 대응됩니다.</li>
+              <li>`AUG`는 시작코돈(메티오닌)으로 작동합니다.</li>
+              <li>하나의 아미노산을 여러 코돈이 암호화할 수 있습니다(퇴화성).</li>
+            </ul>
+          </div>
+          <div id="codon-grid" class="codon-grid"></div>
+        </article>
+
+        <article class="panel step-card">
+          <h2>4) Amino Acid Sequence</h2>
+          <p id="aa-meta" class="meta"></p>
+          <div class="edu-note">
+            <p>핵심 개념</p>
+            <ul>
+              <li>번역은 N-말단에서 C-말단 방향으로 폴리펩타이드 사슬을 만듭니다.</li>
+              <li>종결코돈은 아미노산으로 번역되지 않고 번역을 종료합니다.</li>
+              <li>만들어진 1차 서열이 접혀 3차원 단백질 구조를 형성합니다.</li>
+            </ul>
+          </div>
+          <pre id="aa-seq" class="sequence-box"></pre>
+        </article>
+      </section>
+
+      <section class="panel viewer-section">
+        <div class="viewer-header">
+          <div class="viewer-title-wrap">
+            <h2>5) 3D Fold (AlphaFold 공식 모델)</h2>
+            <p id="fold-meta" class="muted"></p>
+            <p id="fold-hint" class="meta"></p>
+          </div>
+          <button id="reload-structure" type="button">구조 다시 불러오기</button>
+        </div>
+        <div class="viewer-shell" id="viewer-shell">
+          <div id="viewer" class="viewer"></div>
+        </div>
+        <p class="legend">색상: pLDDT 유사 구간 (파랑 높음, 주황/빨강 낮음). 실험 구조가 아니라 예측 구조입니다.</p>
+      </section>
+
+      <section class="panel references">
+        <h2>출처</h2>
+        <ul id="source-links"></ul>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
