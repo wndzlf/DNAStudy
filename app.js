@@ -1,6 +1,15 @@
 const CATALOG_PATH = "./genes.json";
 const CODON_PREVIEW_COUNT = 30;
+const FLOW_PREVIEW_COUNT = 12;
 const LONG_PROTEIN_THRESHOLD = 1300;
+const FLOW_PALETTE = [
+  { bg: "rgba(56, 189, 248, 0.22)", line: "rgba(56, 189, 248, 0.7)" },
+  { bg: "rgba(45, 212, 191, 0.22)", line: "rgba(45, 212, 191, 0.7)" },
+  { bg: "rgba(129, 140, 248, 0.22)", line: "rgba(129, 140, 248, 0.7)" },
+  { bg: "rgba(251, 191, 36, 0.24)", line: "rgba(251, 191, 36, 0.72)" },
+  { bg: "rgba(244, 114, 182, 0.22)", line: "rgba(244, 114, 182, 0.72)" },
+  { bg: "rgba(134, 239, 172, 0.24)", line: "rgba(134, 239, 172, 0.75)" }
+];
 
 const CODON_TABLE = {
   UUU: "F", UUC: "F", UUA: "L", UUG: "L",
@@ -32,7 +41,8 @@ const state = {
   requestToken: 0,
   cdsCache: new Map(),
   alphaFoldCache: new Map(),
-  resizeObserver: null
+  resizeObserver: null,
+  pinnedFlowIndex: null
 };
 
 const el = {
@@ -41,12 +51,15 @@ const el = {
   geneSummary: document.getElementById("gene-summary"),
   dnaMeta: document.getElementById("dna-meta"),
   dnaSeq: document.getElementById("dna-seq"),
+  dnaFlow: document.getElementById("dna-flow"),
   mrnaMeta: document.getElementById("mrna-meta"),
   mrnaSeq: document.getElementById("mrna-seq"),
+  mrnaFlow: document.getElementById("mrna-flow"),
   codonMeta: document.getElementById("codon-meta"),
   codonGrid: document.getElementById("codon-grid"),
   aaMeta: document.getElementById("aa-meta"),
   aaSeq: document.getElementById("aa-seq"),
+  aaFlow: document.getElementById("aa-flow"),
   foldMeta: document.getElementById("fold-meta"),
   foldHint: document.getElementById("fold-hint"),
   sourceLinks: document.getElementById("source-links"),
@@ -69,6 +82,25 @@ function splitIntoCodons(rna) {
     if (codon.length === 3) codons.push(codon);
   }
   return codons;
+}
+
+function flowColor(index) {
+  return FLOW_PALETTE[index % FLOW_PALETTE.length];
+}
+
+function applyFlowColor(node, index) {
+  const color = flowColor(index);
+  node.style.setProperty("--flow-color-bg", color.bg);
+  node.style.setProperty("--flow-color-soft", color.line);
+}
+
+function createFlowToken(text, index, className = "flow-token") {
+  const token = document.createElement("span");
+  token.className = className;
+  token.dataset.flowIndex = String(index);
+  token.textContent = text;
+  applyFlowColor(token, index);
+  return token;
 }
 
 function translateCodons(codons) {
@@ -114,10 +146,55 @@ function currentRequestIs(token) {
   return token === state.requestToken;
 }
 
+function clearFlowHighlight() {
+  const tokens = document.querySelectorAll(".flow-token[data-flow-index]");
+  tokens.forEach((token) => {
+    token.classList.remove("is-focus", "is-dim");
+  });
+}
+
+function highlightFlow(index) {
+  const tokens = document.querySelectorAll(".flow-token[data-flow-index]");
+  tokens.forEach((token) => {
+    const same = Number(token.dataset.flowIndex) === index;
+    token.classList.toggle("is-focus", same);
+    token.classList.toggle("is-dim", !same);
+  });
+}
+
+function resetFlowFocus() {
+  state.pinnedFlowIndex = null;
+  clearFlowHighlight();
+}
+
+function renderFlowStrips(dnaCodons, mrnaCodons, aaList) {
+  const previewCount = Math.min(
+    FLOW_PREVIEW_COUNT,
+    dnaCodons.length,
+    mrnaCodons.length,
+    aaList.length
+  );
+
+  const dnaTokens = [];
+  const mrnaTokens = [];
+  const aaTokens = [];
+
+  for (let i = 0; i < previewCount; i += 1) {
+    dnaTokens.push(createFlowToken(`${i + 1}:${dnaCodons[i]}`, i));
+    mrnaTokens.push(createFlowToken(`${i + 1}:${mrnaCodons[i]}`, i));
+    aaTokens.push(createFlowToken(`${i + 1}:${aaList[i]}`, i));
+  }
+
+  el.dnaFlow.replaceChildren(...dnaTokens);
+  el.mrnaFlow.replaceChildren(...mrnaTokens);
+  el.aaFlow.replaceChildren(...aaTokens);
+}
+
 function setPipelineLoading(gene) {
   const stableTranscriptId = stripTranscriptVersion(gene.transcriptId);
   const predictedCodons = Math.floor((gene.cdsLength || 0) / 3);
 
+  resetFlowFocus();
   el.geneSummary.textContent = `${gene.id}: ${gene.functionNote}`;
   el.dnaMeta.textContent = `CDS 로딩 중... Transcript ${gene.transcriptId} | Ensembl gene ${gene.ensemblGeneId}`;
   el.mrnaMeta.textContent = `전사 단계 준비 중... 예상 mRNA 길이 약 ${gene.cdsLength} nt`;
@@ -129,6 +206,9 @@ function setPipelineLoading(gene) {
   el.aaSeq.textContent = "번역 결과를 계산하는 중...";
 
   el.codonGrid.replaceChildren();
+  el.dnaFlow.replaceChildren();
+  el.mrnaFlow.replaceChildren();
+  el.aaFlow.replaceChildren();
 }
 
 function renderPipeline(gene, dnaRaw) {
@@ -138,6 +218,7 @@ function renderPipeline(gene, dnaRaw) {
   }
 
   const mrna = dna.replaceAll("T", "U");
+  const dnaCodons = splitIntoCodons(dna);
   const codons = splitIntoCodons(mrna);
   const aaList = translateCodons(codons);
   const proteinWithStop = aaList.join("");
@@ -150,27 +231,27 @@ function renderPipeline(gene, dnaRaw) {
   const shownCodonCount = Math.min(CODON_PREVIEW_COUNT, codons.length);
 
   el.dnaMeta.textContent =
-    `CDS 길이 ${dna.length} nt | 시작코돈 ${startCodon} | 마지막 3nt ${stopCodon} | Transcript ${gene.transcriptId}`;
+    `DNA 설계도 길이 ${dna.length}글자 | 시작 신호 ${startCodon} | 끝 신호 후보 ${stopCodon}`;
 
   el.mrnaMeta.textContent =
-    `mRNA 길이 ${mrna.length} nt. 교육용 단순화: coding strand의 T를 U로 치환하여 표시.`;
+    `mRNA 복사본 길이 ${mrna.length}글자 | 이 화면에서는 DNA의 T를 U로 바꿔 보여줍니다.`;
 
   el.codonMeta.textContent =
-    `총 ${codons.length}개 코돈(5' -> 3'). 아래에 앞 ${shownCodonCount}개를 표시합니다.`;
+    `코돈은 3글자 단어입니다. 총 ${codons.length}개 단어 중 앞 ${shownCodonCount}개를 표시합니다.`;
 
   el.aaMeta.textContent =
-    `번역 결과 ${protein.length} aa, stop codon ${stopCount}개. canonical CDS에서는 보통 마지막에 1개 존재.`;
+    `결과적으로 ${protein.length}개의 아미노산 블록이 연결됩니다. (종결 신호 ${stopCount}개)`;
 
   el.dnaSeq.textContent = formatSequence(dna);
   el.mrnaSeq.textContent = formatSequence(mrna);
   el.aaSeq.textContent = formatAminoAcids(protein);
 
+  renderFlowStrips(dnaCodons, codons, aaList);
+
   el.codonGrid.replaceChildren();
   codons.slice(0, CODON_PREVIEW_COUNT).forEach((codon, idx) => {
-    const chip = document.createElement("div");
-    chip.className = "codon-chip";
-    chip.textContent = `${idx + 1}. ${codon}\n-> ${aaList[idx]}`;
-    el.codonGrid.appendChild(chip);
+    const chip = createFlowToken(`${idx + 1}. ${codon}\n-> ${aaList[idx]}`, idx, "codon-chip flow-token");
+    el.codonGrid.append(chip);
   });
 
   if (codons.length > CODON_PREVIEW_COUNT) {
@@ -342,6 +423,43 @@ function renderCatalogOptions() {
   el.select.replaceChildren(...options);
 }
 
+function setupFlowInteractions() {
+  const pipelineRoot = document.querySelector(".pipeline-grid");
+  if (!pipelineRoot) return;
+
+  pipelineRoot.addEventListener("mouseover", (event) => {
+    if (state.pinnedFlowIndex !== null) return;
+    const token = event.target.closest(".flow-token[data-flow-index]");
+    if (!token || !pipelineRoot.contains(token)) return;
+    highlightFlow(Number(token.dataset.flowIndex));
+  });
+
+  pipelineRoot.addEventListener("mouseleave", () => {
+    if (state.pinnedFlowIndex !== null) return;
+    clearFlowHighlight();
+  });
+
+  pipelineRoot.addEventListener("click", (event) => {
+    const token = event.target.closest(".flow-token[data-flow-index]");
+    if (!token || !pipelineRoot.contains(token)) return;
+    const index = Number(token.dataset.flowIndex);
+    if (state.pinnedFlowIndex === index) {
+      resetFlowFocus();
+      return;
+    }
+    state.pinnedFlowIndex = index;
+    highlightFlow(index);
+  });
+
+  document.addEventListener("click", (event) => {
+    const token = event.target.closest(".flow-token[data-flow-index]");
+    if (token) return;
+    if (state.pinnedFlowIndex !== null) {
+      resetFlowFocus();
+    }
+  });
+}
+
 async function onGeneChange() {
   const gene = state.catalog.find((item) => item.id === el.select.value);
   if (!gene) return;
@@ -369,6 +487,9 @@ async function onGeneChange() {
       el.mrnaSeq.textContent = message;
       el.aaSeq.textContent = message;
       el.codonGrid.replaceChildren();
+      el.dnaFlow.replaceChildren();
+      el.mrnaFlow.replaceChildren();
+      el.aaFlow.replaceChildren();
     });
 
   const structurePromise = loadStructure(gene, requestToken);
@@ -378,6 +499,7 @@ async function onGeneChange() {
 
 function setupEvents() {
   el.select.addEventListener("change", onGeneChange);
+  setupFlowInteractions();
 
   el.reloadBtn.addEventListener("click", () => {
     if (!state.currentGene) return;
