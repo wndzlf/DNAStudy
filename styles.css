@@ -321,6 +321,108 @@ button:hover {
   white-space: pre-line;
 }
 
+.insight-section {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.insight-head h2 {
+  margin: 0 0 0.24rem;
+}
+
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.insight-card {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  padding: 0.68rem;
+  background: linear-gradient(145deg, rgba(10, 24, 38, 0.72), rgba(12, 32, 46, 0.45));
+}
+
+.insight-card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.97rem;
+}
+
+.insight-list {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.36rem;
+}
+
+.insight-list li {
+  color: #d6e8f4;
+  font-size: 0.87rem;
+  line-height: 1.34;
+}
+
+.interaction-list {
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.36rem;
+}
+
+.interaction-item {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9px;
+  padding: 0.46rem 0.55rem;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.interaction-left {
+  min-width: 0;
+}
+
+.interaction-left a {
+  color: #d8fff6;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.interaction-left a:hover {
+  text-decoration: underline;
+}
+
+.interaction-left p {
+  margin: 0.2rem 0 0;
+  color: #c9dff0;
+  font-size: 0.8rem;
+}
+
+.interaction-score {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: #fff3c5;
+  background: rgba(251, 191, 36, 0.2);
+  border: 1px solid rgba(251, 191, 36, 0.42);
+  border-radius: 999px;
+  padding: 0.2rem 0.45rem;
+  white-space: nowrap;
+}
+
+.interaction-btn {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  padding: 0.36rem 0.48rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #042028;
+  background: linear-gradient(135deg, #8be9ff, #50d8ff);
+}
+
+.interaction-btn:hover {
+  filter: brightness(1.05);
+}
+
 .viewer-section {
   display: grid;
   gap: 0.72rem;
@@ -383,6 +485,10 @@ button:hover {
 
 @media (max-width: 980px) {
   .pipeline-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .insight-grid {
     grid-template-columns: 1fr;
   }
 

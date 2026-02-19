@@ -158,19 +158,50 @@
         </article>
       </section>
 
+      <section class="panel insight-section">
+        <div class="insight-head">
+          <h2>5) 단백질 기능과 상호작용</h2>
+          <p id="insight-meta" class="meta"></p>
+        </div>
+        <p class="meta">
+          설명 기준: UniProt 검증(Reviewed) 주석과 IntAct 기반 상호작용 정보를 교육용으로 요약합니다.
+        </p>
+        <div class="insight-grid">
+          <article class="insight-card">
+            <h3>이 단백질은 무엇을 하나요?</h3>
+            <ul id="function-list" class="insight-list"></ul>
+          </article>
+          <article class="insight-card">
+            <h3>어디에서 작동하나요?</h3>
+            <ul id="location-list" class="insight-list"></ul>
+          </article>
+        </div>
+        <div class="insight-grid">
+          <article class="insight-card">
+            <h3>주요 상호작용 파트너</h3>
+            <p class="meta">실험 보고 수가 높은 파트너를 우선 표시합니다.</p>
+            <div id="interaction-list" class="interaction-list"></div>
+          </article>
+          <article class="insight-card">
+            <h3>관련 생물학 경로 (Reactome)</h3>
+            <ul id="pathway-list" class="insight-list"></ul>
+          </article>
+        </div>
+      </section>
+
       <section class="panel viewer-section">
         <div class="viewer-header">
           <div class="viewer-title-wrap">
-            <h2>5) 3D Fold (AlphaFold 공식 모델)</h2>
+            <h2>6) 3D 구조 (AlphaFold / PDB 복합체)</h2>
             <p id="fold-meta" class="muted"></p>
             <p id="fold-hint" class="meta"></p>
           </div>
-          <button id="reload-structure" type="button">구조 다시 불러오기</button>
+          <button id="reload-structure" type="button">리셋</button>
         </div>
         <div class="viewer-shell" id="viewer-shell">
           <div id="viewer" class="viewer"></div>
         </div>
-        <p class="legend">색상: pLDDT 유사 구간 (파랑 높음, 주황/빨강 낮음). 실험 구조가 아니라 예측 구조입니다.</p>
+        <p class="legend">단일 구조 모드: AlphaFold pLDDT 색상. 상호작용 모드: 청록/주황이 두 단백질 체인, stick은 인터페이스 후보.</p>
       </section>
 
       <section class="panel references">
