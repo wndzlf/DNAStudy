@@ -3,221 +3,299 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DNA to Protein Fold Explorer</title>
+    <title>DNAStudy | Computational Genomics 학습 허브</title>
+    <meta
+      name="description"
+      content="CompGenomR 책의 목차 기반으로 학습하는 시각화 허브. 챕터 1을 한국어 교육용으로 재구성하고 기존 DNA-Protein Explorer로 바로 이동할 수 있습니다."
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&amp;family=Noto+Sans+KR:wght@400;500;700;800&amp;family=Sora:wght@500;600;700&amp;display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles.css" />
-    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+    <link rel="stylesheet" href="./study-hub.css" />
   </head>
   <body>
-    <div class="bg-orb bg-orb-1"></div>
-    <div class="bg-orb bg-orb-2"></div>
+    <div class="noise-layer" aria-hidden="true"></div>
+    <div class="glow glow-a" aria-hidden="true"></div>
+    <div class="glow glow-b" aria-hidden="true"></div>
 
-    <main class="page">
-      <header class="hero">
-        <p class="eyebrow">교육용 분자생물학 시각화</p>
-        <h1>DNA -> 전사 -> 코돈 -> 단백질 접힘</h1>
-        <p>
-          생물학을 처음 배우는 사람도 이해할 수 있게, 유전 정보가 단백질이 되기까지의 흐름을
-          단계별로 보여줍니다. 같은 색 블록은 서로 같은 위치의 정보입니다.
+    <main class="hub-layout">
+      <header class="hero-card">
+        <p class="hero-kicker">DNAStudy Learning Hub</p>
+        <h1>Computational Genomics 목차 기반 학습</h1>
+        <p class="hero-copy">
+          이 화면은 <strong>CompGenomR</strong> 원문을 바탕으로 챕터별 핵심을 시각화한
+          학습 허브입니다. 현재는 <strong>Chapter 1</strong>을 먼저 제작했고, 다른 챕터는
+          같은 구조로 순차 확장할 수 있게 설계했습니다.
         </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="./explorer.html">기존 DNA -> Protein Explorer 열기</a>
+          <a
+            class="btn btn-ghost"
+            href="https://compgenomr.github.io/book/who-is-this-book-for.html#what-will-you-get-out-of-this"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            원문 목차 보기
+          </a>
+        </div>
       </header>
 
-      <section class="panel glossary">
-        <div class="glossary-head">
-          <h2>용어 한눈에 보기</h2>
-          <p class="meta">처음 보는 단어가 있어도 아래 정의를 먼저 보면 전체 흐름이 훨씬 쉬워집니다.</p>
+      <aside class="toc-card" aria-label="책 목차">
+        <div class="toc-head">
+          <h2>책 목차</h2>
+          <p>클릭하면 해당 장으로 이동합니다.</p>
         </div>
-        <div class="glossary-grid">
-          <article class="term-card">
-            <h3>DNA</h3>
-            <p>세포가 단백질을 만들 때 참고하는 원본 설계도입니다.</p>
-          </article>
-          <article class="term-card">
-            <h3>CDS</h3>
-            <p>DNA 중에서 실제 단백질로 번역되는 핵심 구간입니다.</p>
-          </article>
-          <article class="term-card">
-            <h3>전사 (Transcription)</h3>
-            <p>DNA 정보를 복사해 mRNA를 만드는 과정입니다.</p>
-          </article>
-          <article class="term-card">
-            <h3>mRNA</h3>
-            <p>DNA 정보를 리보솜으로 전달하는 메시지 복사본입니다.</p>
-          </article>
-          <article class="term-card">
-            <h3>코돈 (Codon)</h3>
-            <p>mRNA의 3글자 단어이며, 아미노산 1개와 연결됩니다.</p>
-          </article>
-          <article class="term-card">
-            <h3>PDB</h3>
-            <p>단백질 3D 구조를 모아 둔 국제 데이터베이스(Protein Data Bank)입니다.</p>
-          </article>
-          <article class="term-card">
-            <h3>PDB 복합체</h3>
-            <p>여러 단백질(또는 단백질-DNA)이 실제로 붙은 상태를 실험으로 측정한 3D 구조입니다.</p>
-          </article>
-          <article class="term-card">
-            <h3>번역 (Translation)</h3>
-            <p>mRNA 코돈을 읽어 아미노산 사슬을 만드는 과정입니다.</p>
-          </article>
-          <article class="term-card">
-            <h3>아미노산</h3>
-            <p>단백질을 이루는 기본 블록(재료)입니다.</p>
-          </article>
-          <article class="term-card">
-            <h3>시작 코돈</h3>
-            <p>대부분 AUG(또는 DNA에서 ATG)이며 단백질 생산 시작 신호입니다.</p>
-          </article>
-          <article class="term-card">
-            <h3>종결 코돈</h3>
-            <p>번역을 멈추라는 신호로 UAA/UAG/UGA가 대표적입니다.</p>
-          </article>
-          <article class="term-card">
-            <h3>단백질 접힘 (Folding)</h3>
-            <p>아미노산 사슬이 3차원 모양으로 접혀 기능을 갖게 되는 단계입니다.</p>
-          </article>
+        <ol id="chapter-list" class="chapter-list"></ol>
+        <p class="toc-note">현재 공개 학습 버전: Chapter 1 완성, Chapter 2~11 준비 중</p>
+      </aside>
+
+      <section class="chapter-panel" aria-live="polite">
+        <div class="chapter-panel-head">
+          <p class="section-tag" id="chapter-tag">Chapter 1</p>
+          <h2 id="chapter-title">Introduction to Genomics</h2>
+          <p id="chapter-subtitle" class="chapter-subtitle"></p>
         </div>
-      </section>
 
-      <section class="panel controls">
-        <div class="control-row">
-          <label for="gene-select">유전자/단백질 선택</label>
-          <select id="gene-select"></select>
+        <div id="chapter-content" class="chapter-content">
+          <section id="chapter-1-content" class="chapter-1-wrap">
+            <div class="mini-glossary panel">
+              <h3>용어 미리보기</h3>
+              <div class="glossary-grid">
+                <article>
+                  <h4>Genome</h4>
+                  <p>생명체가 가진 전체 DNA 정보 묶음입니다.</p>
+                </article>
+                <article>
+                  <h4>Gene</h4>
+                  <p>기능성 RNA 또는 단백질로 연결되는 유전체 구간입니다.</p>
+                </article>
+                <article>
+                  <h4>Transcription</h4>
+                  <p>DNA 정보를 RNA로 복사하는 단계입니다.</p>
+                </article>
+                <article>
+                  <h4>High-throughput assay</h4>
+                  <p>유전체 전반을 대량으로 측정하는 실험 방법입니다.</p>
+                </article>
+              </div>
+            </div>
+
+            <div class="chapter1-tabs" role="tablist" aria-label="Chapter 1 세부 파트">
+              <button class="part-tab is-active" data-part="part-11" role="tab" aria-selected="true">1.1 Gene/DNA</button>
+              <button class="part-tab" data-part="part-12" role="tab" aria-selected="false">1.2 Regulation</button>
+              <button class="part-tab" data-part="part-13" role="tab" aria-selected="false">1.3 Mutation</button>
+              <button class="part-tab" data-part="part-14" role="tab" aria-selected="false">1.4 High-throughput</button>
+              <button class="part-tab" data-part="part-15" role="tab" aria-selected="false">1.5 Browser/Data</button>
+            </div>
+
+            <article id="part-11" class="part-panel is-active" role="tabpanel">
+              <header>
+                <h3>1.1 Genes, DNA and central dogma</h3>
+                <p>
+                  유전체(genome) 안에는 다양한 유전 정보가 있고, 특정 구간(gene)이 전사/번역을 거쳐
+                  기능성 분자(단백질 또는 RNA)로 연결됩니다.
+                </p>
+              </header>
+
+              <div class="visual-slab dogma-slab">
+                <div class="dogma-flow" aria-label="중심원리 흐름">
+                  <div class="dogma-node dna">
+                    <p class="node-title">DNA</p>
+                    <p class="node-sub">설계도 저장</p>
+                  </div>
+                  <div class="dogma-arrow">전사</div>
+                  <div class="dogma-node rna">
+                    <p class="node-title">RNA</p>
+                    <p class="node-sub">메시지 전달</p>
+                  </div>
+                  <div class="dogma-arrow">번역</div>
+                  <div class="dogma-node protein">
+                    <p class="node-title">Protein</p>
+                    <p class="node-sub">기능 수행</p>
+                  </div>
+                </div>
+
+                <div class="gene-track" aria-label="유전자 구조 예시">
+                  <p class="track-title">유전자 화면 표현(예시)</p>
+                  <div class="track-body">
+                    <span class="feature promoter">Promoter</span>
+                    <span class="feature exon">Exon 1</span>
+                    <span class="feature intron">Intron</span>
+                    <span class="feature exon">Exon 2</span>
+                    <span class="feature intron">Intron</span>
+                    <span class="feature exon">Exon 3</span>
+                  </div>
+                  <p class="track-note">실제 브라우저에서는 화살표로 전사 방향(+- strand)도 함께 봅니다.</p>
+                </div>
+              </div>
+            </article>
+
+            <article id="part-12" class="part-panel" role="tabpanel" hidden>
+              <header>
+                <h3>1.2 Elements of gene regulation</h3>
+                <p>
+                  유전자는 항상 같은 양으로 켜지지 않습니다. 전사 조절 요소와 후전사 조절 요소가
+                  결합되어 발현량이 바뀝니다.
+                </p>
+              </header>
+
+              <div class="visual-slab regulation-slab">
+                <div class="regulator-controls">
+                  <label><input type="checkbox" data-reg="enhancer" checked /> Enhancer 활성</label>
+                  <label><input type="checkbox" data-reg="silencer" /> Silencer 활성</label>
+                  <label><input type="checkbox" data-reg="methylation" /> Promoter DNA methylation</label>
+                  <label><input type="checkbox" data-reg="mirna" /> miRNA 분해 유도</label>
+                </div>
+                <div class="expression-meter-wrap">
+                  <p>예시 발현량</p>
+                  <div class="expression-meter">
+                    <span id="expression-bar"></span>
+                  </div>
+                  <p id="expression-value" class="mono">0%</p>
+                  <p id="expression-note" class="meter-note"></p>
+                </div>
+              </div>
+            </article>
+
+            <article id="part-13" class="part-panel" role="tabpanel" hidden>
+              <header>
+                <h3>1.3 Shaping the genome: DNA mutation</h3>
+                <p>
+                  돌연변이는 진화와 질병 연구 모두에서 핵심입니다. 형태(치환/삽입/결실 등), 크기,
+                  기능 영향(기능 획득/상실) 관점으로 분류합니다.
+                </p>
+              </header>
+
+              <div class="visual-slab mutation-slab">
+                <div class="mutation-picker">
+                  <label for="mutation-type">변이 유형 선택</label>
+                  <select id="mutation-type">
+                    <option value="substitution">Base substitution</option>
+                    <option value="deletion">Deletion</option>
+                    <option value="insertion">Insertion</option>
+                    <option value="inversion">Inversion</option>
+                    <option value="translocation">Translocation (개념 예시)</option>
+                  </select>
+                </div>
+                <div class="mutation-view">
+                  <p class="mono" id="mutation-before"></p>
+                  <p class="mono" id="mutation-after"></p>
+                  <p id="mutation-note" class="meter-note"></p>
+                </div>
+                <div class="mutation-tags">
+                  <span>구조 변화</span>
+                  <span>규모 변화</span>
+                  <span>기능 변화</span>
+                </div>
+              </div>
+            </article>
+
+            <article id="part-14" class="part-panel" role="tabpanel" hidden>
+              <header>
+                <h3>1.4 High-throughput experimental methods</h3>
+                <p>
+                  대량 유전체 실험은 보통 <strong>추출 -> enrichment -> 정량</strong>의 공통 단계를
+                  갖고, 최근에는 시퀀싱 기반 정량이 핵심 축이 되었습니다.
+                </p>
+              </header>
+
+              <div class="visual-slab ht-slab">
+                <div class="ht-steps">
+                  <div class="ht-step"><strong>1</strong><span>Extraction</span></div>
+                  <div class="ht-step"><strong>2</strong><span>Enrichment</span></div>
+                  <div class="ht-step"><strong>3</strong><span>Quantification</span></div>
+                </div>
+                <div class="ht-questions">
+                  <article>
+                    <h4>RNA-seq</h4>
+                    <p>어떤 유전자가 얼마나 발현되는가?</p>
+                  </article>
+                  <article>
+                    <h4>ChIP-seq</h4>
+                    <p>특정 단백질이 어디에 결합하는가?</p>
+                  </article>
+                  <article>
+                    <h4>Methyl-seq</h4>
+                    <p>어떤 염기가 메틸화되어 있는가?</p>
+                  </article>
+                  <article>
+                    <h4>Single-cell</h4>
+                    <p>세포별 이질성은 어떻게 다른가?</p>
+                  </article>
+                </div>
+              </div>
+            </article>
+
+            <article id="part-15" class="part-panel" role="tabpanel" hidden>
+              <header>
+                <h3>1.5 Visualization and data repositories</h3>
+                <p>
+                  실제 분석에서는 브라우저(UCSC, Ensembl, IGV)와 저장소(GEO, ENA, ENCODE, TCGA 등)를
+                  연결해 가설을 세우고 검증합니다.
+                </p>
+              </header>
+
+              <div class="visual-slab repo-slab">
+                <div class="resource-grid">
+                  <a href="https://genome.ucsc.edu/" target="_blank" rel="noopener noreferrer">UCSC Browser</a>
+                  <a href="https://www.ensembl.org" target="_blank" rel="noopener noreferrer">Ensembl</a>
+                  <a href="https://www.broadinstitute.org/igv/" target="_blank" rel="noopener noreferrer">IGV</a>
+                  <a href="https://www.ncbi.nlm.nih.gov/geo/" target="_blank" rel="noopener noreferrer">GEO</a>
+                  <a href="https://www.ebi.ac.uk/ena" target="_blank" rel="noopener noreferrer">ENA</a>
+                  <a href="https://www.encodeproject.org/" target="_blank" rel="noopener noreferrer">ENCODE</a>
+                  <a href="https://www.cancer.gov/ccg/research/genome-sequencing/tcga" target="_blank" rel="noopener noreferrer">TCGA</a>
+                  <a href="https://www.internationalgenome.org/" target="_blank" rel="noopener noreferrer">1000 Genomes</a>
+                </div>
+              </div>
+            </article>
+
+            <section class="chapter-source panel">
+              <h3>Chapter 1 출처</h3>
+              <ul>
+                <li>
+                  원문 TOC: <a href="https://compgenomr.github.io/book/who-is-this-book-for.html#what-will-you-get-out-of-this" target="_blank" rel="noopener noreferrer">Who is this book for? / TOC</a>
+                </li>
+                <li>
+                  Chapter 1: <a href="https://compgenomr.github.io/book/intro.html" target="_blank" rel="noopener noreferrer">Introduction to Genomics</a>
+                </li>
+                <li>
+                  1.1: <a href="https://compgenomr.github.io/book/genes-dna-and-central-dogma.html" target="_blank" rel="noopener noreferrer">Genes, DNA and central dogma</a>
+                </li>
+                <li>
+                  1.2: <a href="https://compgenomr.github.io/book/elements-of-gene-regulation.html" target="_blank" rel="noopener noreferrer">Elements of gene regulation</a>
+                </li>
+                <li>
+                  1.3: <a href="https://compgenomr.github.io/book/shaping-the-genome-dna-mutation.html" target="_blank" rel="noopener noreferrer">Shaping the genome: DNA mutation</a>
+                </li>
+                <li>
+                  1.4: <a href="https://compgenomr.github.io/book/high-throughput-experimental-methods-in-genomics.html" target="_blank" rel="noopener noreferrer">High-throughput experimental methods in genomics</a>
+                </li>
+                <li>
+                  1.5: <a href="https://compgenomr.github.io/book/visualization-and-data-repositories-for-genomics.html" target="_blank" rel="noopener noreferrer">Visualization and data repositories for genomics</a>
+                </li>
+                <li>
+                  원본 집필 소스(Rmd): <a href="https://raw.githubusercontent.com/compgenomr/book/master/01-intro2Genomics.Rmd" target="_blank" rel="noopener noreferrer">01-intro2Genomics.Rmd</a>
+                </li>
+              </ul>
+              <p class="small-note">
+                본 페이지는 원문을 그대로 복제하지 않고, 학습 목적으로 핵심 개념을 한국어로 재구성한
+                요약 시각화입니다.
+              </p>
+            </section>
+          </section>
+
+          <section id="chapter-placeholder" class="placeholder-card" hidden>
+            <h3 id="placeholder-title"></h3>
+            <p id="placeholder-copy"></p>
+            <a id="placeholder-link" class="btn btn-primary" target="_blank" rel="noopener noreferrer">원문 장으로 이동</a>
+          </section>
         </div>
-        <p id="catalog-meta" class="muted"></p>
-        <p id="gene-summary" class="muted"></p>
-        <p class="meta">
-          색 연결 가이드: 같은 색은 같은 위치(같은 3글자 묶음)의 DNA, mRNA, Codon, Amino Acid를 뜻합니다.
-        </p>
-      </section>
-
-      <section class="pipeline-grid">
-        <article class="panel step-card">
-          <h2>1) DNA (Coding Sequence, CDS)</h2>
-          <p class="meta" id="dna-meta"></p>
-          <div class="edu-note">
-            <p>핵심 개념</p>
-            <ul>
-              <li>DNA는 단백질을 만드는 설계도입니다.</li>
-              <li>그중 CDS는 실제로 단백질 제작에 쓰이는 핵심 구간입니다.</li>
-              <li>보통 시작 신호(ATG)로 시작하고 끝 신호(TAA/TAG/TGA)로 끝납니다.</li>
-            </ul>
-          </div>
-          <pre id="dna-seq" class="sequence-box"></pre>
-          <div class="flow-wrap">
-            <p class="flow-title">DNA 3글자 묶음 (앞 12개)</p>
-            <div id="dna-flow" class="flow-strip"></div>
-          </div>
-        </article>
-
-        <article class="panel step-card">
-          <h2>2) mRNA (Transcription)</h2>
-          <p class="meta" id="mrna-meta"></p>
-          <div class="edu-note">
-            <p>핵심 개념</p>
-            <ul>
-              <li>mRNA는 DNA 설계도를 리보솜으로 전달하는 복사본입니다.</li>
-              <li>교육용으로 DNA의 T를 U로 바꿔 mRNA로 표현합니다.</li>
-              <li>리보솜은 이 mRNA를 3글자씩 읽어 단백질을 만듭니다.</li>
-            </ul>
-          </div>
-          <pre id="mrna-seq" class="sequence-box"></pre>
-          <div class="flow-wrap">
-            <p class="flow-title">mRNA 3글자 묶음 (앞 12개)</p>
-            <div id="mrna-flow" class="flow-strip"></div>
-          </div>
-        </article>
-
-        <article class="panel step-card">
-          <h2>3) Codon</h2>
-          <p class="meta" id="codon-meta"></p>
-          <div class="edu-note">
-            <p>핵심 개념</p>
-            <ul>
-              <li>코돈은 mRNA의 3글자 단어입니다.</li>
-              <li>각 코돈은 특정 아미노산 1개와 연결됩니다.</li>
-              <li>AUG는 시작 코돈으로 자주 사용됩니다.</li>
-            </ul>
-          </div>
-          <div id="codon-grid" class="codon-grid"></div>
-        </article>
-
-        <article class="panel step-card">
-          <h2>4) Amino Acid Sequence</h2>
-          <p id="aa-meta" class="meta"></p>
-          <div class="edu-note">
-            <p>핵심 개념</p>
-            <ul>
-              <li>아미노산은 단백질을 만드는 작은 블록입니다.</li>
-              <li>코돈을 순서대로 읽으며 아미노산 블록이 길게 연결됩니다.</li>
-              <li>이 긴 사슬이 접혀서 실제 단백질 모양이 됩니다.</li>
-            </ul>
-          </div>
-          <pre id="aa-seq" class="sequence-box"></pre>
-          <div class="flow-wrap">
-            <p class="flow-title">아미노산 연결 (앞 12개)</p>
-            <div id="aa-flow" class="flow-strip"></div>
-          </div>
-        </article>
-      </section>
-
-      <section class="panel insight-section">
-        <div class="insight-head">
-          <h2>5) 단백질 기능과 상호작용</h2>
-          <p id="insight-meta" class="meta"></p>
-        </div>
-        <p class="meta">
-          설명 기준: UniProt 검증(Reviewed) 주석과 IntAct 기반 상호작용 정보를 교육용으로 요약합니다.
-        </p>
-        <div class="insight-grid">
-          <article class="insight-card">
-            <h3>이 단백질은 무엇을 하나요?</h3>
-            <ul id="function-list" class="insight-list"></ul>
-          </article>
-          <article class="insight-card">
-            <h3>어디에서 작동하나요?</h3>
-            <ul id="location-list" class="insight-list"></ul>
-          </article>
-        </div>
-        <div class="insight-grid">
-          <article class="insight-card">
-            <h3>주요 상호작용 파트너</h3>
-            <p class="meta">실험 보고 수가 높은 파트너를 우선 표시합니다.</p>
-            <div id="interaction-list" class="interaction-list"></div>
-          </article>
-          <article class="insight-card">
-            <h3>관련 생물학 경로 (Reactome)</h3>
-            <ul id="pathway-list" class="insight-list"></ul>
-          </article>
-        </div>
-      </section>
-
-      <section class="panel viewer-section">
-        <div class="viewer-header">
-          <div class="viewer-title-wrap">
-            <h2>6) 3D 구조 (AlphaFold / PDB 복합체)</h2>
-            <p id="fold-meta" class="muted"></p>
-            <p id="fold-hint" class="meta"></p>
-          </div>
-          <button id="reload-structure" type="button">리셋</button>
-        </div>
-        <div class="viewer-shell" id="viewer-shell">
-          <div id="viewer" class="viewer"></div>
-        </div>
-        <p class="legend">단일 구조 모드: AlphaFold pLDDT 색상. 상호작용 모드: 청록/주황이 두 단백질 체인, stick은 인터페이스 후보.</p>
-      </section>
-
-      <section class="panel references">
-        <h2>출처</h2>
-        <ul id="source-links"></ul>
       </section>
     </main>
 
-    <script src="./app.js"></script>
+    <script src="./study-hub.js"></script>
   </body>
 </html>

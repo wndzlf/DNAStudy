@@ -1,6 +1,11 @@
-# DNA to Protein Fold Explorer
+# DNAStudy Learning Hub
 
-교육용 웹앱입니다. 실제 인간 유전자의 canonical CDS를 기반으로 `DNA -> mRNA -> codon -> amino acid -> 3D folding` 흐름을 시각화합니다.
+교육용 웹앱입니다.
+
+- `/` : CompGenomR 기반 목차형 학습 허브 (현재 Chapter 1 시각화 제공)
+- `/explorer.html` : 기존 DNA -> mRNA -> codon -> amino acid -> 3D folding 탐색기
+
+기존 탐색기는 실제 인간 유전자의 canonical CDS를 기반으로 `DNA -> mRNA -> codon -> amino acid -> 3D folding` 흐름을 시각화합니다.
 
 ## 포함 데이터
 검증된 인간 유전자 32개를 제공합니다.
@@ -25,6 +30,7 @@ python3 -m http.server 8080
 ```
 
 3. 브라우저에서 `http://localhost:8080` 접속
+4. 기존 탐색기 직접 진입: `http://localhost:8080/explorer.html`
 
 ## 구현 포인트
 - 사용자는 임의 서열 입력이 아니라 검증된 리스트에서 선택
