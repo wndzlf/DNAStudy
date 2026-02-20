@@ -2,7 +2,7 @@
 
 교육용 웹앱입니다.
 
-- `/` : CompGenomR 기반 목차형 학습 허브 (현재 Chapter 1 시각화 제공)
+- `/` : CompGenomR 기반 목차형 학습 허브 (현재 Chapter 1~11 시각화 학습 제공)
 - `/explorer.html` : 기존 DNA -> mRNA -> codon -> amino acid -> 3D folding 탐색기
 
 기존 탐색기는 실제 인간 유전자의 canonical CDS를 기반으로 `DNA -> mRNA -> codon -> amino acid -> 3D folding` 흐름을 시각화합니다.
