@@ -20,6 +20,14 @@
 - AlphaFold DB API (`/api/prediction/{UniProt}`)
 - UniProt
 
+## 라이선스 준수 (CompGenomR 기반 콘텐츠)
+- 원문: https://compgenomr.github.io/book/
+- 원저작자: Altuna Akalin
+- 원문 라이선스: CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+- 본 프로젝트의 CompGenomR 기반 챕터 요약/시각화 콘텐츠도 동일하게 CC BY-NC-SA 4.0 조건을 따릅니다.
+- 비상업(NonCommercial) 용도만 허용하며, 재배포/수정 시 저작자 표시와 동일 라이선스 유지가 필요합니다.
+- 상세 문구: `/Users/user/DNA/CONTENT-LICENSE.md`
+
 ## 실행
 1. 터미널에서 프로젝트 루트로 이동
 2. 정적 서버 실행

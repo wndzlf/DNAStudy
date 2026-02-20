@@ -141,6 +141,17 @@ body {
   max-width: 940px;
 }
 
+.hero-license {
+  margin: 0.5rem 0 0;
+  color: #c9dcfb;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.hero-license a {
+  color: #a8f6e8;
+}
+
 .hero-actions {
   margin-top: 0.86rem;
   display: flex;
@@ -717,6 +728,40 @@ body {
   margin: 0.5rem 0 0;
   color: #a6bfde;
   font-size: 0.8rem;
+}
+
+.license-footer {
+  grid-column: 1 / -1;
+  padding: 0.9rem 1rem;
+}
+
+.license-footer h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.license-footer p {
+  margin: 0.45rem 0 0;
+  color: #bfd2ec;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.license-footer ul {
+  margin: 0.55rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.license-footer li {
+  color: #d8e7ff;
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.license-footer a {
+  color: #9fefff;
 }
 
 .placeholder-card {
