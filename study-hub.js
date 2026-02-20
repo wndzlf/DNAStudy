@@ -149,6 +149,34 @@ const CHAPTER_LESSONS = {
         { label: "EDA & Modeling", focus: "패턴 탐색과 모델 학습", tools: "stats, caret, ggplot2" },
         { label: "Reporting", focus: "결과 재현/공유", tools: "R Markdown, script" }
       ]
+    },
+    study: {
+      pace: "권장 45~60분",
+      path: [
+        { title: "개념 읽기", minutes: 12, action: "2.1~2.2를 읽고 분석 단계 흐름을 그려본다." },
+        { title: "자료구조 정리", minutes: 12, action: "vector/matrix/data.frame/list 차이를 예제로 정리한다." },
+        { title: "시각화 확인", minutes: 10, action: "워크플로 단계 버튼을 눌러 도구 포인트를 비교한다." },
+        { title: "손코딩", minutes: 12, action: "csv 입력 -> data.frame 변환 -> plot 출력 스크립트를 작성한다." }
+      ],
+      checklist: [
+        "분석 단계 5단계를 순서대로 설명할 수 있다.",
+        "data.frame과 matrix의 차이를 실제 코드로 보여줄 수 있다.",
+        "CRAN/Bioconductor 패키지 설치 명령을 구분해 기억한다."
+      ],
+      quiz: [
+        {
+          question: "유전체 count table을 샘플 x 변수 형태로 다루고, 열 이름/형태가 섞인 데이터를 정리할 때 가장 기본이 되는 구조는?",
+          choices: ["vector", "data.frame", "factor", "array"],
+          answer: 1,
+          explanation: "data.frame은 열별 자료형을 유지하면서 표 형식 데이터를 다루기 좋습니다."
+        },
+        {
+          question: "재현 가능한 분석 보고를 위해 가장 직접적인 출력 방식은?",
+          choices: ["스크린샷만 저장", "코드와 결과를 한 문서로 묶기", "결과 숫자만 수기로 정리", "그래프만 저장"],
+          answer: 1,
+          explanation: "코드+설명+결과를 함께 남겨야 재현성과 협업성이 올라갑니다."
+        }
+      ]
     }
   },
   3: {
@@ -186,6 +214,34 @@ const CHAPTER_LESSONS = {
       kind: "distribution",
       title: "분포와 임계값 해석",
       note: "평균과 표준편차를 바꾸면 분포 모양과 tail 확률이 어떻게 변하는지 확인합니다."
+    },
+    study: {
+      pace: "권장 50~70분",
+      path: [
+        { title: "핵심 개념 읽기", minutes: 15, action: "중심 경향/분산/신뢰구간 개념을 먼저 정리한다." },
+        { title: "시각화 조작", minutes: 12, action: "μ, σ를 바꿔 tail 확률이 어떻게 달라지는지 기록한다." },
+        { title: "검정 흐름 정리", minutes: 12, action: "randomization vs t-test vs FDR 흐름을 한 장 표로 만든다." },
+        { title: "해석 연습", minutes: 15, action: "예시 결과를 보고 '유의성'과 '효과크기'를 분리해 설명한다." }
+      ],
+      checklist: [
+        "신뢰구간이 p-value와 다른 정보를 주는 이유를 설명할 수 있다.",
+        "다중검정 보정이 필요한 상황을 예시로 말할 수 있다.",
+        "상관계수와 인과관계를 혼동하지 않는다."
+      ],
+      quiz: [
+        {
+          question: "수천 개 유전자에서 동시에 검정을 수행할 때 반드시 고려해야 하는 것은?",
+          choices: ["표본 수를 무조건 늘리기", "다중검정 보정(FDR 등)", "평균만 비교하기", "시각화 생략"],
+          answer: 1,
+          explanation: "동시 검정에서는 거짓양성 증가를 막기 위해 다중검정 보정이 필요합니다."
+        },
+        {
+          question: "신뢰구간(Confidence Interval)의 주된 목적은?",
+          choices: ["정답 하나를 확정", "추정치의 불확실성 범위 표현", "표본 수 계산 대체", "모형 선택 자동화"],
+          answer: 1,
+          explanation: "신뢰구간은 추정치 주변의 불확실성 범위를 제공합니다."
+        }
+      ]
     }
   },
   4: {
@@ -223,6 +279,34 @@ const CHAPTER_LESSONS = {
       kind: "clustering",
       title: "k 값에 따른 군집 분할",
       note: "k를 바꾸면서 같은 데이터가 어떻게 다른 그룹 구조로 보이는지 확인합니다."
+    },
+    study: {
+      pace: "권장 45~60분",
+      path: [
+        { title: "거리/유사도 복습", minutes: 10, action: "distance metric이 결과를 바꾸는 이유를 먼저 이해한다." },
+        { title: "k 조절 실습", minutes: 12, action: "시각화에서 k를 바꿔 inertia와 군집 경계를 비교한다." },
+        { title: "PCA/MDS/t-SNE 비교", minutes: 12, action: "각 기법이 보존하는 정보와 한계를 정리한다." },
+        { title: "해석 노트 작성", minutes: 12, action: "클러스터 의미를 생물학 변수와 연결해 가설을 1개 만든다." }
+      ],
+      checklist: [
+        "k를 키웠을 때 무조건 좋은 모델이 아님을 설명할 수 있다.",
+        "PCA와 t-SNE의 목적 차이를 말할 수 있다.",
+        "군집 결과를 반드시 외부 생물학 정보로 검증해야 함을 이해한다."
+      ],
+      quiz: [
+        {
+          question: "k-means에서 k를 계속 키우면 inertia는 일반적으로 어떻게 되나?",
+          choices: ["증가한다", "감소하거나 유지된다", "항상 동일하다", "무작위로 바뀐다"],
+          answer: 1,
+          explanation: "클러스터 수가 늘면 각 점과 중심 간 제곱거리 합(inertia)은 줄어드는 방향입니다."
+        },
+        {
+          question: "t-SNE 해석에서 가장 주의할 점은?",
+          choices: ["축의 절대값 자체를 생물학 변수처럼 해석", "근접 이웃 구조 중심으로 해석", "표본 수와 무관하게 항상 안정", "거리 보존이 PCA보다 항상 우수"],
+          answer: 1,
+          explanation: "t-SNE는 지역 구조 보존에 강점이 있어 전역 거리 해석은 신중해야 합니다."
+        }
+      ]
     }
   },
   5: {
@@ -260,6 +344,34 @@ const CHAPTER_LESSONS = {
       kind: "classification",
       title: "임계값에 따른 분류 성능 변화",
       note: "threshold를 조절해 TP/FP/FN/TN이 어떻게 바뀌는지 확인합니다."
+    },
+    study: {
+      pace: "권장 55~75분",
+      path: [
+        { title: "문제 정의", minutes: 12, action: "예측 타깃, 입력 피처, 성능 지표를 먼저 정의한다." },
+        { title: "전처리 점검", minutes: 15, action: "스케일링/결측치/상관 제거 이유를 사례로 정리한다." },
+        { title: "임계값 실습", minutes: 12, action: "시각화에서 threshold를 바꿔 confusion matrix 변화를 본다." },
+        { title: "성능 해석", minutes: 15, action: "accuracy/precision/recall trade-off를 상황별로 해석한다." }
+      ],
+      checklist: [
+        "훈련/검증/테스트 분리의 목적을 설명할 수 있다.",
+        "accuracy가 높아도 recall이 낮으면 위험할 수 있음을 이해한다.",
+        "ROC/AUC를 임계값 민감도와 함께 읽을 수 있다."
+      ],
+      quiz: [
+        {
+          question: "의료 스크리닝처럼 놓치면 위험한 문제에서 보통 우선 고려하는 지표는?",
+          choices: ["Recall(민감도)", "Specificity만", "학습 시간", "모델 파라미터 수"],
+          answer: 0,
+          explanation: "위양성보다 위음성(놓침) 비용이 큰 경우 recall을 우선 관리하는 경우가 많습니다."
+        },
+        {
+          question: "테스트셋을 반복적으로 모델 튜닝에 쓰면 생길 수 있는 문제는?",
+          choices: ["모델이 더 일반화됨", "데이터 누수/성능 과대평가", "학습 속도 증가", "클래스 불균형 자동 보정"],
+          answer: 1,
+          explanation: "테스트셋은 최종 평가 전용이어야 하며 반복 튜닝에 쓰면 과대적합된 평가가 됩니다."
+        }
+      ]
     }
   },
   6: {
@@ -611,6 +723,7 @@ function setActiveChapter(number, pushHash = true) {
   if (chapter.number === 1) {
     el.chapter1.hidden = false;
     el.chapterDynamic.hidden = true;
+    setActivePart("part-11");
   } else {
     el.chapter1.hidden = true;
     el.chapterDynamic.hidden = false;
@@ -725,13 +838,13 @@ function renderDynamicChapter(chapter) {
     return;
   }
 
-  const nodes = [
-    createOverviewPanel(lesson),
-    createSectionsPanel(lesson),
-    createTermsPanel(lesson),
-    createVisualPanel(chapter, lesson),
-    createSourcePanel(chapter, lesson)
-  ];
+  const nodes = [createOverviewPanel(lesson), createSectionsPanel(lesson), createTermsPanel(lesson)];
+  const studyPanel = createStudyPanel(chapter, lesson);
+  if (studyPanel) nodes.push(studyPanel);
+  nodes.push(createVisualPanel(chapter, lesson));
+  const quizPanel = createQuizPanel(chapter, lesson);
+  if (quizPanel) nodes.push(quizPanel);
+  nodes.push(createSourcePanel(chapter, lesson));
 
   el.chapterDynamic.replaceChildren(...nodes);
 }
@@ -808,6 +921,146 @@ function createTermsPanel(lesson) {
   });
 
   panel.append(h3, wrap);
+  return panel;
+}
+
+function createStudyPanel(chapter, lesson) {
+  const study = lesson.study;
+  if (!study) return null;
+
+  const panel = document.createElement("article");
+  panel.className = "panel lesson-study";
+
+  const head = document.createElement("div");
+  head.className = "study-head";
+
+  const h3 = document.createElement("h3");
+  h3.textContent = `Chapter ${chapter.number} 스터디 플랜`;
+
+  const pace = document.createElement("p");
+  pace.className = "study-kicker";
+  pace.textContent = study.pace;
+
+  head.append(h3, pace);
+
+  const pathWrap = document.createElement("div");
+  pathWrap.className = "study-path-grid";
+
+  (study.path || []).forEach((step, idx) => {
+    const card = document.createElement("article");
+    card.className = "study-step-card";
+    card.innerHTML = `
+      <h4>${idx + 1}. ${step.title}</h4>
+      <p class="study-min mono">${step.minutes}분</p>
+      <p>${step.action}</p>
+    `;
+    pathWrap.appendChild(card);
+  });
+
+  const checklistWrap = document.createElement("div");
+  checklistWrap.className = "study-checklist";
+
+  const checkTitle = document.createElement("h4");
+  checkTitle.textContent = "완료 체크";
+
+  const progress = document.createElement("p");
+  progress.className = "study-progress mono";
+
+  const checks = document.createElement("div");
+  checks.className = "study-check-items";
+
+  const boxes = (study.checklist || []).map((item, idx) => {
+    const label = document.createElement("label");
+    label.className = "study-check";
+
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.dataset.studyCheck = `${chapter.number}-${idx}`;
+
+    const span = document.createElement("span");
+    span.textContent = item;
+
+    input.addEventListener("change", () => {
+      label.classList.toggle("is-checked", input.checked);
+      updateProgress();
+    });
+
+    label.append(input, span);
+    checks.appendChild(label);
+    return input;
+  });
+
+  function updateProgress() {
+    const total = boxes.length;
+    const done = boxes.filter((box) => box.checked).length;
+    progress.textContent = `진행률 ${done}/${total}`;
+  }
+
+  updateProgress();
+  checklistWrap.append(checkTitle, progress, checks);
+
+  panel.append(head, pathWrap, checklistWrap);
+  return panel;
+}
+
+function createQuizPanel(chapter, lesson) {
+  const quizList = lesson.study?.quiz;
+  if (!Array.isArray(quizList) || quizList.length === 0) return null;
+
+  const panel = document.createElement("article");
+  panel.className = "panel lesson-quiz";
+
+  const h3 = document.createElement("h3");
+  h3.textContent = `Chapter ${chapter.number} 미니퀴즈`;
+
+  const note = document.createElement("p");
+  note.className = "viz-note";
+  note.textContent = "보기 버튼을 눌러 즉시 정답/해설을 확인할 수 있습니다.";
+
+  const quizGrid = document.createElement("div");
+  quizGrid.className = "quiz-grid";
+
+  quizList.forEach((quiz, qIdx) => {
+    const card = document.createElement("article");
+    card.className = "quiz-card";
+
+    const q = document.createElement("h4");
+    q.textContent = `Q${qIdx + 1}. ${quiz.question}`;
+
+    const options = document.createElement("div");
+    options.className = "quiz-options";
+
+    const feedback = document.createElement("p");
+    feedback.className = "quiz-feedback";
+
+    (quiz.choices || []).forEach((choice, cIdx) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "quiz-option";
+      btn.textContent = choice;
+
+      btn.addEventListener("click", () => {
+        const all = options.querySelectorAll(".quiz-option");
+        all.forEach((node, idx) => {
+          node.classList.remove("is-correct", "is-wrong");
+          if (idx === quiz.answer) node.classList.add("is-correct");
+        });
+
+        if (cIdx !== quiz.answer) btn.classList.add("is-wrong");
+
+        const correctText = quiz.choices?.[quiz.answer] || "";
+        const result = cIdx === quiz.answer ? "정답" : `오답 (정답: ${correctText})`;
+        feedback.textContent = `${result} - ${quiz.explanation}`;
+      });
+
+      options.appendChild(btn);
+    });
+
+    card.append(q, options, feedback);
+    quizGrid.appendChild(card);
+  });
+
+  panel.append(h3, note, quizGrid);
   return panel;
 }
 

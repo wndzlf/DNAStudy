@@ -780,6 +780,11 @@ body {
   padding: 0.88rem;
 }
 
+.lesson-study,
+.lesson-quiz {
+  padding: 0.88rem;
+}
+
 .lesson-overview h3,
 .lesson-sections h3,
 .lesson-terms h3,
@@ -857,6 +862,192 @@ body {
   font-size: 0.78rem;
   font-weight: 700;
   padding: 0.24rem 0.5rem;
+}
+
+.study-head {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.study-head h3,
+.lesson-quiz h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.study-kicker {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #9ef4e5;
+}
+
+.study-path-grid {
+  margin-top: 0.55rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.44rem;
+}
+
+.study-step-card {
+  border: 1px solid rgba(180, 209, 255, 0.24);
+  border-radius: 10px;
+  background: rgba(8, 18, 34, 0.76);
+  padding: 0.54rem;
+}
+
+.study-step-card h4 {
+  margin: 0;
+  color: #e5f1ff;
+  font-size: 0.84rem;
+}
+
+.study-min {
+  margin: 0.24rem 0 0;
+  color: #9df7e8;
+  font-size: 0.75rem;
+}
+
+.study-step-card p {
+  margin: 0.3rem 0 0;
+  color: #bed2ed;
+  line-height: 1.34;
+  font-size: 0.8rem;
+}
+
+.study-checklist {
+  margin-top: 0.55rem;
+  border: 1px solid rgba(180, 209, 255, 0.24);
+  border-radius: 10px;
+  background: rgba(8, 18, 34, 0.74);
+  padding: 0.6rem;
+}
+
+.study-checklist h4 {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #e7f2ff;
+}
+
+.study-progress {
+  margin: 0.28rem 0 0;
+  color: #9ff4e6;
+  font-size: 0.78rem;
+}
+
+.study-check-items {
+  margin-top: 0.4rem;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.study-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.46rem;
+  border: 1px solid rgba(180, 209, 255, 0.22);
+  border-radius: 8px;
+  padding: 0.36rem 0.44rem;
+  font-size: 0.8rem;
+  color: #d4e6ff;
+  background: rgba(5, 13, 26, 0.6);
+}
+
+.study-check input {
+  margin-top: 0.14rem;
+  accent-color: #56e9cc;
+}
+
+.study-check.is-checked {
+  border-color: rgba(86, 233, 204, 0.62);
+  background: rgba(86, 233, 204, 0.12);
+}
+
+.quiz-grid {
+  margin-top: 0.56rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.quiz-card {
+  border: 1px solid rgba(180, 209, 255, 0.24);
+  border-radius: 10px;
+  background: rgba(8, 18, 34, 0.74);
+  padding: 0.58rem;
+}
+
+.quiz-card h4 {
+  margin: 0;
+  color: #e5f1ff;
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.quiz-options {
+  margin-top: 0.42rem;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.quiz-option {
+  border: 1px solid rgba(180, 209, 255, 0.28);
+  border-radius: 8px;
+  padding: 0.34rem 0.44rem;
+  text-align: left;
+  background: rgba(5, 12, 24, 0.7);
+  color: #d7e8ff;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.quiz-option.is-correct {
+  border-color: rgba(89, 238, 198, 0.75);
+  background: rgba(89, 238, 198, 0.18);
+}
+
+.quiz-option.is-wrong {
+  border-color: rgba(255, 126, 143, 0.78);
+  background: rgba(255, 126, 143, 0.16);
+}
+
+.quiz-feedback {
+  margin: 0.38rem 0 0;
+  color: #c2d6ef;
+  font-size: 0.79rem;
+  line-height: 1.35;
+}
+
+.chapter1-study h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.chapter1-study-grid {
+  margin-top: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.chapter1-study-grid article {
+  border: 1px solid rgba(180, 209, 255, 0.24);
+  border-radius: 10px;
+  background: rgba(8, 18, 34, 0.72);
+  padding: 0.55rem;
+}
+
+.chapter1-study-grid h4 {
+  margin: 0;
+  color: #e5f1ff;
+  font-size: 0.84rem;
+}
+
+.chapter1-study-grid p {
+  margin: 0.3rem 0 0;
+  color: #bed3ee;
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
 .lesson-visual-head {
@@ -1089,6 +1280,11 @@ body {
   }
 
   .lesson-section-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .study-path-grid,
+  .chapter1-study-grid {
     grid-template-columns: 1fr;
   }
 
