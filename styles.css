@@ -611,6 +611,12 @@ button:disabled {
   font-size: 0.97rem;
 }
 
+.game-lab h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #d6ebff;
+}
+
 .game-range-label {
   font-size: 0.85rem;
   color: #d8ecfb;
@@ -637,6 +643,12 @@ button:disabled {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.45rem;
+}
+
+.game-divider {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(34, 211, 238, 0.45), rgba(245, 158, 11, 0.32));
+  margin: 0.1rem 0;
 }
 
 .viewer-section {

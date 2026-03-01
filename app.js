@@ -13,7 +13,9 @@ const FLOW_PALETTE = [
 ];
 const GAME_POINTS_PER_CLEAR = 10;
 const RNA_PUZZLE_POINTS = 5;
+const RNA_STRUCTURE_POINTS = 12;
 const RNA_PUZZLE_TARGET_DNA = "TGGACTGA";
+const RNA_STRUCTURE_TARGET = "(((..((....))..)))....";
 const INTERACTION_GAME_MISSIONS = [
   {
     id: "insulin-signal",
@@ -144,7 +146,8 @@ const state = {
     lastLoadedMissionId: null,
     lastContactCount: 0,
     lastContactPairLabel: "",
-    rnaSolved: false
+    rnaSolved: false,
+    rnaStructureSolved: false
   }
 };
 
@@ -194,7 +197,11 @@ const el = {
   rnaAnswerInput: document.getElementById("rna-answer-input"),
   rnaCheckBtn: document.getElementById("rna-check-btn"),
   rnaFeedback: document.getElementById("rna-feedback"),
-  rnaHint: document.getElementById("rna-hint")
+  rnaHint: document.getElementById("rna-hint"),
+  rnaStructureTarget: document.getElementById("rna-structure-target"),
+  rnaStructureInput: document.getElementById("rna-structure-input"),
+  rnaStructureCheckBtn: document.getElementById("rna-structure-check-btn"),
+  rnaStructureFeedback: document.getElementById("rna-structure-feedback")
 };
 
 function stripTranscriptVersion(transcriptId) {
@@ -557,6 +564,69 @@ function dnaToRnaComplement(dna) {
     .join("");
 }
 
+function isCanonicalRnaPair(left, right) {
+  const pair = `${left}${right}`;
+  return pair === "AU" || pair === "UA" || pair === "GC" || pair === "CG" || pair === "GU" || pair === "UG";
+}
+
+function parseDotBracketPairs(structure) {
+  const stack = [];
+  const pairs = [];
+  for (let i = 0; i < structure.length; i += 1) {
+    const token = structure[i];
+    if (token === "(") {
+      stack.push(i);
+      continue;
+    }
+    if (token === ")") {
+      const left = stack.pop();
+      if (left === undefined) continue;
+      pairs.push([left, i]);
+    }
+  }
+  return pairs;
+}
+
+function evaluateRnaStructure(sequence, targetStructure) {
+  const seq = normalizeRnaInput(sequence);
+  const target = String(targetStructure || "");
+  if (!seq || seq.length !== target.length) {
+    return {
+      ok: false,
+      message: `길이를 맞춰 주세요. target ${target.length}글자, 입력 ${seq.length}글자`,
+      scorePercent: 0
+    };
+  }
+
+  const pairs = parseDotBracketPairs(target);
+  if (pairs.length === 0) {
+    return {
+      ok: false,
+      message: "target 구조에서 pair를 계산하지 못했습니다.",
+      scorePercent: 0
+    };
+  }
+
+  let matchedPairs = 0;
+  pairs.forEach(([left, right]) => {
+    if (isCanonicalRnaPair(seq[left], seq[right])) {
+      matchedPairs += 1;
+    }
+  });
+
+  const gcCount = seq.split("").filter((base) => base === "G" || base === "C").length;
+  const gcRatio = gcCount / seq.length;
+  const scorePercent = Math.round((matchedPairs / pairs.length) * 100);
+  const allPairsMatched = matchedPairs === pairs.length;
+  const gcInRange = gcRatio >= 0.35 && gcRatio <= 0.7;
+
+  return {
+    ok: allPairsMatched && gcInRange,
+    message: `pair ${matchedPairs}/${pairs.length}, GC ${(gcRatio * 100).toFixed(1)}%`,
+    scorePercent
+  };
+}
+
 function setGameContactMessage(message) {
   if (!el.gameContactScore) return;
   el.gameContactScore.textContent = message;
@@ -597,6 +667,14 @@ function renderRnaPuzzleStatus() {
   if (!state.game.rnaSolved && !el.rnaFeedback.textContent) {
     el.rnaFeedback.textContent = "RNA를 입력하고 상보성 확인 버튼을 눌러보세요.";
   }
+
+  if (el.rnaStructureTarget) {
+    el.rnaStructureTarget.textContent = RNA_STRUCTURE_TARGET;
+  }
+  if (el.rnaStructureFeedback && !el.rnaStructureFeedback.textContent) {
+    el.rnaStructureFeedback.textContent =
+      `목표 길이 ${RNA_STRUCTURE_TARGET.length}글자 | 먼저 RNA 서열을 입력하고 구조 채점을 눌러보세요.`;
+  }
 }
 
 function getCurrentGameMission() {
@@ -627,8 +705,9 @@ function renderGameLearningPoints(points) {
 function renderGameStatus() {
   const total = INTERACTION_GAME_MISSIONS.length;
   const solved = state.game.solved.size;
-  const rnaBadge = state.game.rnaSolved ? " | RNA 퍼즐 완료" : "";
-  el.gameProgress.textContent = `완료 ${solved}/${total}${rnaBadge} | 정답을 맞히면 실제 3D 복합체를 확인할 수 있습니다.`;
+  const rnaBadge = state.game.rnaSolved ? " | RNA 상보 퍼즐 완료" : "";
+  const structureBadge = state.game.rnaStructureSolved ? " | RNA 구조 퍼즐 완료" : "";
+  el.gameProgress.textContent = `완료 ${solved}/${total}${rnaBadge}${structureBadge} | 정답을 맞히면 실제 3D 복합체를 확인할 수 있습니다.`;
   el.gameScore.textContent = `점수 ${state.game.score}점`;
 }
 
@@ -863,6 +942,29 @@ function checkRnaPuzzleAnswer() {
   el.rnaFeedback.textContent = `부분 일치 ${matchCount}/${expected.length}. 상보 규칙(A-U, T-A, G-C, C-G)을 다시 확인해 보세요.`;
 }
 
+function checkRnaStructurePuzzleAnswer() {
+  if (!el.rnaStructureInput || !el.rnaStructureFeedback) return;
+  const sequence = normalizeRnaInput(el.rnaStructureInput.value);
+  el.rnaStructureInput.value = sequence;
+
+  const result = evaluateRnaStructure(sequence, RNA_STRUCTURE_TARGET);
+  if (!result.ok) {
+    el.rnaStructureFeedback.textContent = `구조 점수 ${result.scorePercent}% | ${result.message}`;
+    return;
+  }
+
+  let scoreMessage = "이미 클리어한 퍼즐입니다.";
+  if (!state.game.rnaStructureSolved) {
+    state.game.rnaStructureSolved = true;
+    state.game.score += RNA_STRUCTURE_POINTS;
+    scoreMessage = `+${RNA_STRUCTURE_POINTS}점`;
+  }
+
+  el.rnaStructureFeedback.textContent =
+    `구조 점수 ${result.scorePercent}% | ${result.message} | 구조 퍼즐 클리어 (${scoreMessage})`;
+  renderGameStatus();
+}
+
 async function loadMissionStructure(mission, requestToken) {
   const viewer = ensureViewer();
   if (!currentRequestIs(requestToken)) return;
@@ -973,6 +1075,20 @@ function setupGameEvents() {
   el.rnaAnswerInput?.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       checkRnaPuzzleAnswer();
+    }
+  });
+
+  el.rnaStructureInput?.addEventListener("input", () => {
+    el.rnaStructureInput.value = normalizeRnaInput(el.rnaStructureInput.value);
+  });
+
+  el.rnaStructureCheckBtn?.addEventListener("click", () => {
+    checkRnaStructurePuzzleAnswer();
+  });
+
+  el.rnaStructureInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      checkRnaStructurePuzzleAnswer();
     }
   });
 }

@@ -252,6 +252,22 @@
           </div>
           <p id="rna-feedback" class="meta"></p>
           <p id="rna-hint" class="meta"></p>
+          <div class="game-divider"></div>
+          <h4>Eterna Puzzle 11098076 참고: dot-bracket 구조 채점</h4>
+          <p class="meta">
+            목표 2차 구조(dot-bracket)를 보고 RNA 서열을 입력하면, 염기쌍 적합도를 점수화합니다.
+          </p>
+          <p class="rna-target">Target Structure: <code id="rna-structure-target"></code></p>
+          <div class="rna-input-row">
+            <input
+              id="rna-structure-input"
+              type="text"
+              maxlength="64"
+              placeholder="예: GGAUCCAAAGGGUU..."
+            />
+            <button id="rna-structure-check-btn" type="button">구조 채점</button>
+          </div>
+          <p id="rna-structure-feedback" class="meta"></p>
         </article>
       </section>
 
