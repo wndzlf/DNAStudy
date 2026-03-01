@@ -189,6 +189,16 @@ select {
   min-width: min(560px, 100%);
 }
 
+input[type="text"] {
+  background: rgba(239, 247, 253, 0.96);
+  color: #0d1b2a;
+  border: 1px solid rgba(11, 32, 48, 0.25);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.88rem;
+}
+
 button {
   background: linear-gradient(135deg, #26c485, #1db67a);
   color: #03120d;
@@ -587,6 +597,48 @@ button:disabled {
   flex-wrap: wrap;
 }
 
+.game-lab {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  background: rgba(5, 18, 30, 0.58);
+  padding: 0.72rem 0.78rem;
+  display: grid;
+  gap: 0.52rem;
+}
+
+.game-lab h3 {
+  margin: 0;
+  font-size: 0.97rem;
+}
+
+.game-range-label {
+  font-size: 0.85rem;
+  color: #d8ecfb;
+  font-weight: 700;
+}
+
+#game-contact-threshold {
+  width: 100%;
+}
+
+.rna-target {
+  margin: 0;
+  color: #e4f4ff;
+  font-family: var(--mono);
+  font-size: 0.88rem;
+}
+
+.rna-target code {
+  color: #9bf3d7;
+  font-weight: 700;
+}
+
+.rna-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.45rem;
+}
+
 .viewer-section {
   display: grid;
   gap: 0.72rem;
@@ -671,6 +723,14 @@ button:disabled {
   }
 
   .game-action-row button {
+    width: 100%;
+  }
+
+  .rna-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .rna-input-row button {
     width: 100%;
   }
 

@@ -12,6 +12,8 @@ const FLOW_PALETTE = [
   { bg: "rgba(134, 239, 172, 0.24)", line: "rgba(134, 239, 172, 0.75)" }
 ];
 const GAME_POINTS_PER_CLEAR = 10;
+const RNA_PUZZLE_POINTS = 5;
+const RNA_PUZZLE_TARGET_DNA = "TGGACTGA";
 const INTERACTION_GAME_MISSIONS = [
   {
     id: "insulin-signal",
@@ -137,7 +139,12 @@ const state = {
     solved: new Set(),
     selectedOptionId: null,
     answered: false,
-    lastAwardedPoints: 0
+    lastAwardedPoints: 0,
+    contactThreshold: COMPLEX_DISTANCE_THRESHOLD,
+    lastLoadedMissionId: null,
+    lastContactCount: 0,
+    lastContactPairLabel: "",
+    rnaSolved: false
   }
 };
 
@@ -178,7 +185,16 @@ const el = {
   gamePoints: document.getElementById("game-learning-points"),
   gameLoad3d: document.getElementById("game-load-3d"),
   gameReset: document.getElementById("game-reset"),
-  gameNext: document.getElementById("game-next")
+  gameNext: document.getElementById("game-next"),
+  gameContactThreshold: document.getElementById("game-contact-threshold"),
+  gameContactValue: document.getElementById("game-contact-value"),
+  gameApplyContact: document.getElementById("game-apply-contact"),
+  gameContactScore: document.getElementById("game-contact-score"),
+  rnaTargetDna: document.getElementById("rna-target-dna"),
+  rnaAnswerInput: document.getElementById("rna-answer-input"),
+  rnaCheckBtn: document.getElementById("rna-check-btn"),
+  rnaFeedback: document.getElementById("rna-feedback"),
+  rnaHint: document.getElementById("rna-hint")
 };
 
 function stripTranscriptVersion(transcriptId) {
@@ -528,6 +544,61 @@ function interfaceResidues(model, chainA, chainB, threshold = COMPLEX_DISTANCE_T
   };
 }
 
+function normalizeRnaInput(text) {
+  return String(text || "").toUpperCase().replace(/[^AUCG]/g, "");
+}
+
+function dnaToRnaComplement(dna) {
+  const map = { A: "U", T: "A", G: "C", C: "G" };
+  return String(dna || "")
+    .toUpperCase()
+    .split("")
+    .map((base) => map[base] || "")
+    .join("");
+}
+
+function setGameContactMessage(message) {
+  if (!el.gameContactScore) return;
+  el.gameContactScore.textContent = message;
+}
+
+function updateContactThresholdLabel() {
+  if (!el.gameContactValue) return;
+  el.gameContactValue.textContent = `${state.game.contactThreshold.toFixed(1)} A`;
+}
+
+function clearMissionContactContext(message = "미션 정답 구조를 3D로 불러온 뒤 접촉 점수를 계산할 수 있습니다.") {
+  state.game.lastLoadedMissionId = null;
+  state.game.lastContactCount = 0;
+  state.game.lastContactPairLabel = "";
+  setGameContactMessage(message);
+}
+
+function setContactScoreSummary(contactCount, pairLabel) {
+  state.game.lastContactCount = contactCount;
+  state.game.lastContactPairLabel = pairLabel;
+  const tier = contactCount >= 120
+    ? "높은 접촉"
+    : contactCount >= 70
+      ? "중간 접촉"
+      : "낮은 접촉";
+  setGameContactMessage(
+    `접촉 점수 ${contactCount} (${tier}) | ${pairLabel} | 기준 ${state.game.contactThreshold.toFixed(1)}A`
+  );
+}
+
+function renderRnaPuzzleStatus() {
+  if (!el.rnaTargetDna || !el.rnaHint || !el.rnaFeedback) return;
+
+  const expected = dnaToRnaComplement(RNA_PUZZLE_TARGET_DNA);
+  el.rnaTargetDna.textContent = RNA_PUZZLE_TARGET_DNA;
+  el.rnaHint.textContent = `규칙: A-U, T-A, G-C, C-G | 정답 길이 ${expected.length}글자`;
+
+  if (!state.game.rnaSolved && !el.rnaFeedback.textContent) {
+    el.rnaFeedback.textContent = "RNA를 입력하고 상보성 확인 버튼을 눌러보세요.";
+  }
+}
+
 function getCurrentGameMission() {
   return INTERACTION_GAME_MISSIONS[state.game.missionIndex] || null;
 }
@@ -556,7 +627,8 @@ function renderGameLearningPoints(points) {
 function renderGameStatus() {
   const total = INTERACTION_GAME_MISSIONS.length;
   const solved = state.game.solved.size;
-  el.gameProgress.textContent = `완료 ${solved}/${total} | 정답을 맞히면 실제 3D 복합체를 확인할 수 있습니다.`;
+  const rnaBadge = state.game.rnaSolved ? " | RNA 퍼즐 완료" : "";
+  el.gameProgress.textContent = `완료 ${solved}/${total}${rnaBadge} | 정답을 맞히면 실제 3D 복합체를 확인할 수 있습니다.`;
   el.gameScore.textContent = `점수 ${state.game.score}점`;
 }
 
@@ -643,6 +715,12 @@ function renderGameMission() {
   } else {
     el.gameFeedback.textContent = selected.reason;
   }
+
+  if (state.game.lastLoadedMissionId !== mission.id) {
+    setGameContactMessage(`${mission.label} 정답 구조를 3D로 열면 접촉 점수를 계산할 수 있습니다.`);
+  } else {
+    setContactScoreSummary(state.game.lastContactCount, state.game.lastContactPairLabel);
+  }
 }
 
 function setGameMission(index) {
@@ -678,8 +756,9 @@ function onGameOptionSelect(optionId) {
   renderGameStatus();
 }
 
-function styleMissionStructure(viewer, mission) {
+function styleMissionStructure(viewer, mission, threshold = state.game.contactThreshold) {
   const mode = mission.structure.mode;
+  const safeThreshold = Number.isFinite(threshold) ? threshold : COMPLEX_DISTANCE_THRESHOLD;
 
   if (mode === "insulin") {
     viewer.setStyle({}, { cartoon: { color: "#2f3f56", opacity: 0.15 } });
@@ -687,7 +766,7 @@ function styleMissionStructure(viewer, mission) {
     viewer.setStyle({ chain: "D" }, { cartoon: { color: "#f59e0b", opacity: 1, thickness: 0.36 } });
 
     const model = viewer.getModel();
-    const iface = interfaceResidues(model, "A", "D");
+    const iface = interfaceResidues(model, "A", "D", safeThreshold);
     if (iface.primaryResi.length > 0) {
       viewer.setStyle(
         { chain: "A", resi: iface.primaryResi },
@@ -702,7 +781,9 @@ function styleMissionStructure(viewer, mission) {
     }
 
     return {
-      or: [{ chain: "A" }, { chain: "D" }]
+      zoomSelection: { or: [{ chain: "A" }, { chain: "D" }] },
+      contactScore: iface.primaryResi.length + iface.partnerResi.length,
+      contactPairLabel: "INSR chain A vs INS chain D"
     };
   }
 
@@ -714,7 +795,7 @@ function styleMissionStructure(viewer, mission) {
     viewer.setStyle({ chain: "D" }, { stick: { color: "#fb923c", radius: 0.16 } });
 
     const model = viewer.getModel();
-    const dnaIface = interfaceResidues(model, "A", "C");
+    const dnaIface = interfaceResidues(model, "A", "C", safeThreshold);
     if (dnaIface.primaryResi.length > 0) {
       viewer.setStyle(
         { chain: "A", resi: dnaIface.primaryResi },
@@ -723,12 +804,63 @@ function styleMissionStructure(viewer, mission) {
     }
 
     return {
-      or: [{ chain: "A" }, { chain: "B" }, { chain: "C" }, { chain: "D" }]
+      zoomSelection: { or: [{ chain: "A" }, { chain: "B" }, { chain: "C" }, { chain: "D" }] },
+      contactScore: dnaIface.primaryResi.length + dnaIface.partnerResi.length,
+      contactPairLabel: "Cas9 chain A vs target DNA chain C"
     };
   }
 
   viewer.setStyle({}, { cartoon: { color: "#7f8ea6", opacity: 1 } });
-  return {};
+  return {
+    zoomSelection: {},
+    contactScore: 0,
+    contactPairLabel: "구조 쌍 정보 없음"
+  };
+}
+
+function applyContactThresholdToCurrentMission() {
+  const mission = getCurrentGameMission();
+  if (!mission) return;
+
+  if (state.game.lastLoadedMissionId !== mission.id || !state.viewer) {
+    setGameContactMessage("먼저 현재 미션의 정답 구조를 3D로 불러오세요.");
+    return;
+  }
+
+  const viewer = ensureViewer();
+  const styleResult = styleMissionStructure(viewer, mission, state.game.contactThreshold);
+  viewer.zoomTo(styleResult.zoomSelection);
+  viewer.render();
+
+  setContactScoreSummary(styleResult.contactScore, styleResult.contactPairLabel);
+}
+
+function checkRnaPuzzleAnswer() {
+  if (!el.rnaAnswerInput || !el.rnaFeedback) return;
+
+  const expected = dnaToRnaComplement(RNA_PUZZLE_TARGET_DNA);
+  const answer = normalizeRnaInput(el.rnaAnswerInput.value);
+  el.rnaAnswerInput.value = answer;
+
+  if (answer.length !== expected.length) {
+    el.rnaFeedback.textContent = `길이가 다릅니다. ${expected.length}글자 RNA를 입력해 보세요.`;
+    return;
+  }
+
+  if (answer === expected) {
+    let scoreMessage = "이미 클리어한 퍼즐입니다.";
+    if (!state.game.rnaSolved) {
+      state.game.rnaSolved = true;
+      state.game.score += RNA_PUZZLE_POINTS;
+      scoreMessage = `+${RNA_PUZZLE_POINTS}점`;
+    }
+    el.rnaFeedback.textContent = `정답입니다. CRISPR 가이드 RNA 상보성 퍼즐 클리어 (${scoreMessage})`;
+    renderGameStatus();
+    return;
+  }
+
+  const matchCount = expected.split("").filter((base, idx) => answer[idx] === base).length;
+  el.rnaFeedback.textContent = `부분 일치 ${matchCount}/${expected.length}. 상보 규칙(A-U, T-A, G-C, C-G)을 다시 확인해 보세요.`;
 }
 
 async function loadMissionStructure(mission, requestToken) {
@@ -749,8 +881,8 @@ async function loadMissionStructure(mission, requestToken) {
     viewer.clear();
     viewer.addModel(cifText, "cif");
 
-    const zoomSelection = styleMissionStructure(viewer, mission);
-    viewer.zoomTo(zoomSelection);
+    const styleResult = styleMissionStructure(viewer, mission, state.game.contactThreshold);
+    viewer.zoomTo(styleResult.zoomSelection);
     viewer.resize();
     viewer.render();
 
@@ -759,6 +891,8 @@ async function loadMissionStructure(mission, requestToken) {
       missionId: mission.id,
       pdbId
     };
+    state.game.lastLoadedMissionId = mission.id;
+    setContactScoreSummary(styleResult.contactScore, styleResult.contactPairLabel);
 
     el.foldMeta.textContent = title;
     el.foldHint.textContent = `${hint} 출처: ${mission.structure.sourceUrl}`;
@@ -776,6 +910,8 @@ function setupGameEvents() {
   renderGameMissionTabs();
   renderGameMission();
   renderGameStatus();
+  updateContactThresholdLabel();
+  renderRnaPuzzleStatus();
 
   el.gameMissionTabs.addEventListener("click", (event) => {
     const button = event.target.closest("[data-game-mission-index]");
@@ -815,6 +951,29 @@ function setupGameEvents() {
 
   el.gameNext.addEventListener("click", () => {
     setGameMission(state.game.missionIndex + 1);
+  });
+
+  el.gameContactThreshold?.addEventListener("input", () => {
+    state.game.contactThreshold = Number(el.gameContactThreshold.value) || COMPLEX_DISTANCE_THRESHOLD;
+    updateContactThresholdLabel();
+  });
+
+  el.gameApplyContact?.addEventListener("click", () => {
+    applyContactThresholdToCurrentMission();
+  });
+
+  el.rnaAnswerInput?.addEventListener("input", () => {
+    el.rnaAnswerInput.value = normalizeRnaInput(el.rnaAnswerInput.value);
+  });
+
+  el.rnaCheckBtn?.addEventListener("click", () => {
+    checkRnaPuzzleAnswer();
+  });
+
+  el.rnaAnswerInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      checkRnaPuzzleAnswer();
+    }
   });
 }
 
@@ -1114,6 +1273,7 @@ async function loadStructure(gene, requestToken) {
   const viewer = ensureViewer();
   state.structureMode = "alphafold";
   state.complexContext = null;
+  clearMissionContactContext("현재는 단일 단백질 구조 모드입니다. 미션 정답 구조를 로딩하면 접촉 점수를 계산할 수 있습니다.");
 
   if (!currentRequestIs(requestToken)) return;
   el.foldMeta.textContent = "AlphaFold 구조를 불러오는 중...";
@@ -1168,6 +1328,7 @@ async function loadStructure(gene, requestToken) {
 
 async function loadInteractionComplex(gene, partnerAccession, partnerGene, requestToken) {
   const viewer = ensureViewer();
+  clearMissionContactContext("현재는 자유 상호작용 구조 모드입니다. 미션 정답 구조를 로딩하면 접촉 점수를 계산할 수 있습니다.");
 
   if (!currentRequestIs(requestToken)) return;
   el.foldMeta.textContent = "상호작용 복합체 구조를 탐색하는 중...";
