@@ -200,10 +200,38 @@
         </div>
       </section>
 
+      <section class="panel game-section">
+        <div class="game-head">
+          <h2>6) 3D 상호작용 게임</h2>
+          <p class="meta">
+            실제 PDB 복합체를 기반으로, 단백질이 누구와 붙어 어떤 기능을 하는지 미션처럼 익힙니다.
+          </p>
+        </div>
+        <div class="game-status">
+          <p id="game-progress" class="meta"></p>
+          <p id="game-score" class="muted"></p>
+        </div>
+        <div id="game-mission-tabs" class="game-mission-tabs"></div>
+        <article class="game-playground">
+          <p id="game-mission-label" class="game-label"></p>
+          <h3 id="game-title"></h3>
+          <p id="game-story" class="meta"></p>
+          <p id="game-question" class="game-question"></p>
+          <div id="game-options" class="game-options"></div>
+          <div class="game-action-row">
+            <button id="game-load-3d" type="button">정답 구조 3D 보기</button>
+            <button id="game-reset" type="button" class="secondary-btn">미션 리셋</button>
+            <button id="game-next" type="button" class="secondary-btn">다음 미션</button>
+          </div>
+          <p id="game-feedback" class="meta"></p>
+          <ul id="game-learning-points" class="insight-list"></ul>
+        </article>
+      </section>
+
       <section class="panel viewer-section">
         <div class="viewer-header">
           <div class="viewer-title-wrap">
-            <h2>6) 3D 구조 (AlphaFold / PDB 복합체)</h2>
+            <h2>7) 3D 구조 (AlphaFold / PDB 복합체)</h2>
             <p id="fold-meta" class="muted"></p>
             <p id="fold-hint" class="meta"></p>
           </div>

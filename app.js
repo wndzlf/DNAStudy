@@ -11,6 +11,89 @@ const FLOW_PALETTE = [
   { bg: "rgba(244, 114, 182, 0.22)", line: "rgba(244, 114, 182, 0.72)" },
   { bg: "rgba(134, 239, 172, 0.24)", line: "rgba(134, 239, 172, 0.75)" }
 ];
+const GAME_POINTS_PER_CLEAR = 10;
+const INTERACTION_GAME_MISSIONS = [
+  {
+    id: "insulin-signal",
+    label: "Mission A",
+    title: "인슐린 도킹: 혈당 신호 시작",
+    story:
+      "식사 후 인슐린이 혈액에 나오면 세포 표면 수용체와 결합해 포도당 흡수를 시작시킵니다.",
+    question: "인슐린(INS)이 직접 붙어 신호를 켜는 단백질은 무엇일까요?",
+    options: [
+      {
+        id: "insr",
+        text: "INSR (인슐린 수용체)",
+        isCorrect: true,
+        reason: "정답입니다. 인슐린은 INSR에 결합해 세포 내부 신호를 활성화합니다."
+      },
+      {
+        id: "hbb",
+        text: "HBB (헤모글로빈 베타)",
+        isCorrect: false,
+        reason: "HBB는 산소 운반 단백질로, 인슐린 수용체 역할을 하지 않습니다."
+      },
+      {
+        id: "ace2",
+        text: "ACE2 (막 수용체)",
+        isCorrect: false,
+        reason: "ACE2는 다른 생리 경로에 관여하며 인슐린 결합 수용체가 아닙니다."
+      }
+    ],
+    learningPoints: [
+      "인슐린은 혈당 조절 호르몬이고, 표적은 인슐린 수용체(INSR)입니다.",
+      "리간드(인슐린)-수용체(INSR) 결합은 세포 신호 전달의 대표적인 시작 방식입니다.",
+      "아래 3D는 실제 PDB 복합체(6PXV)이며 실험 구조 데이터를 기반으로 합니다."
+    ],
+    structure: {
+      pdbId: "6PXV",
+      mode: "insulin",
+      sourceUrl: "https://www.rcsb.org/structure/6PXV",
+      title: "PDB 6PXV | Insulin receptor-Insulin complex",
+      hint: "청록: 인슐린 수용체(INSR), 주황: 인슐린(INS). stick은 결합 인터페이스 후보입니다."
+    }
+  },
+  {
+    id: "crispr-edit",
+    label: "Mission B",
+    title: "CRISPR 편집: Cas9-sgRNA-DNA",
+    story:
+      "CRISPR-Cas9은 가이드 RNA(sgRNA)가 표적 DNA를 안내해 Cas9이 특정 위치를 절단하도록 돕습니다.",
+    question: "Cas9이 정확한 위치를 찾도록 안내하는 핵심 분자는 무엇일까요?",
+    options: [
+      {
+        id: "sgrna",
+        text: "sgRNA (가이드 RNA)",
+        isCorrect: true,
+        reason: "정답입니다. sgRNA가 Cas9에 표적 정보를 제공해 DNA 절단 위치를 결정합니다."
+      },
+      {
+        id: "glucose",
+        text: "포도당 (Glucose)",
+        isCorrect: false,
+        reason: "포도당은 에너지원이지 CRISPR 표적 안내 분자가 아닙니다."
+      },
+      {
+        id: "hemoglobin",
+        text: "헤모글로빈",
+        isCorrect: false,
+        reason: "헤모글로빈은 산소 운반 단백질로 CRISPR 편집 기전에 직접 관여하지 않습니다."
+      }
+    ],
+    learningPoints: [
+      "CRISPR 복합체는 단백질(Cas9), RNA(sgRNA), DNA(표적/비표적 가닥)가 함께 작동합니다.",
+      "sgRNA 염기서열 상보성으로 Cas9이 원하는 DNA 위치를 찾습니다.",
+      "아래 3D는 실제 PDB 복합체(5Y36)이며 구조 기반 편집 메커니즘 학습에 사용됩니다."
+    ],
+    structure: {
+      pdbId: "5Y36",
+      mode: "crispr",
+      sourceUrl: "https://www.rcsb.org/structure/5Y36",
+      title: "PDB 5Y36 | Cas9-sgRNA-DNA complex",
+      hint: "청록: Cas9 단백질, 분홍: sgRNA, 노랑/주황: DNA 두 가닥입니다."
+    }
+  }
+];
 
 const CODON_TABLE = {
   UUU: "F", UUC: "F", UUA: "L", UUG: "L",
@@ -47,7 +130,15 @@ const state = {
   resizeObserver: null,
   pinnedFlowIndex: null,
   structureMode: "alphafold",
-  complexContext: null
+  complexContext: null,
+  game: {
+    missionIndex: 0,
+    score: 0,
+    solved: new Set(),
+    selectedOptionId: null,
+    answered: false,
+    lastAwardedPoints: 0
+  }
 };
 
 const el = {
@@ -74,7 +165,20 @@ const el = {
   foldHint: document.getElementById("fold-hint"),
   sourceLinks: document.getElementById("source-links"),
   reloadBtn: document.getElementById("reload-structure"),
-  viewerShell: document.getElementById("viewer-shell")
+  viewerShell: document.getElementById("viewer-shell"),
+  gameMissionTabs: document.getElementById("game-mission-tabs"),
+  gameProgress: document.getElementById("game-progress"),
+  gameScore: document.getElementById("game-score"),
+  gameMissionLabel: document.getElementById("game-mission-label"),
+  gameTitle: document.getElementById("game-title"),
+  gameStory: document.getElementById("game-story"),
+  gameQuestion: document.getElementById("game-question"),
+  gameOptions: document.getElementById("game-options"),
+  gameFeedback: document.getElementById("game-feedback"),
+  gamePoints: document.getElementById("game-learning-points"),
+  gameLoad3d: document.getElementById("game-load-3d"),
+  gameReset: document.getElementById("game-reset"),
+  gameNext: document.getElementById("game-next")
 };
 
 function stripTranscriptVersion(transcriptId) {
@@ -422,6 +526,296 @@ function interfaceResidues(model, chainA, chainB, threshold = COMPLEX_DISTANCE_T
     primaryResi: Array.from(primarySet),
     partnerResi: Array.from(partnerSet)
   };
+}
+
+function getCurrentGameMission() {
+  return INTERACTION_GAME_MISSIONS[state.game.missionIndex] || null;
+}
+
+function resetGameMissionAttempt() {
+  state.game.selectedOptionId = null;
+  state.game.answered = false;
+  state.game.lastAwardedPoints = 0;
+}
+
+function renderGameLearningPoints(points) {
+  const values = Array.isArray(points) ? points : [];
+  if (values.length === 0) {
+    renderTextList(el.gamePoints, [], "학습 포인트가 아직 없습니다.");
+    return;
+  }
+
+  const nodes = values.map((text) => {
+    const li = document.createElement("li");
+    li.textContent = text;
+    return li;
+  });
+  el.gamePoints.replaceChildren(...nodes);
+}
+
+function renderGameStatus() {
+  const total = INTERACTION_GAME_MISSIONS.length;
+  const solved = state.game.solved.size;
+  el.gameProgress.textContent = `완료 ${solved}/${total} | 정답을 맞히면 실제 3D 복합체를 확인할 수 있습니다.`;
+  el.gameScore.textContent = `점수 ${state.game.score}점`;
+}
+
+function renderGameMissionTabs() {
+  const nodes = INTERACTION_GAME_MISSIONS.map((mission, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "game-mission-tab";
+    if (index === state.game.missionIndex) {
+      button.classList.add("is-active");
+    }
+    if (state.game.solved.has(mission.id)) {
+      button.classList.add("is-solved");
+    }
+    button.dataset.gameMissionIndex = String(index);
+    button.innerHTML = `${mission.label}<br>${mission.title}<span class="small">${mission.structure.pdbId}</span>`;
+    return button;
+  });
+
+  el.gameMissionTabs.replaceChildren(...nodes);
+}
+
+function renderGameOptions(mission) {
+  const options = mission.options || [];
+  const nodes = options.map((option) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "game-option";
+    button.dataset.gameOptionId = option.id;
+    button.textContent = option.text;
+
+    if (state.game.selectedOptionId === option.id) {
+      button.classList.add("is-selected");
+    }
+
+    if (state.game.answered && option.isCorrect) {
+      button.classList.add("is-correct");
+    }
+
+    if (state.game.answered && state.game.selectedOptionId === option.id && !option.isCorrect) {
+      button.classList.add("is-wrong");
+    }
+
+    return button;
+  });
+
+  el.gameOptions.replaceChildren(...nodes);
+}
+
+function renderGameMission() {
+  const mission = getCurrentGameMission();
+  if (!mission) return;
+
+  el.gameMissionLabel.textContent = mission.label;
+  el.gameTitle.textContent = mission.title;
+  el.gameStory.textContent = mission.story;
+  el.gameQuestion.textContent = mission.question;
+
+  renderGameOptions(mission);
+  renderGameLearningPoints(mission.learningPoints);
+
+  const selected = mission.options.find((option) => option.id === state.game.selectedOptionId);
+  const canLoad = Boolean(state.game.answered && selected?.isCorrect);
+  el.gameLoad3d.disabled = !canLoad;
+
+  if (!state.game.answered) {
+    el.gameFeedback.textContent = "아래 보기 중 하나를 선택해 정답을 맞히면 3D 구조 버튼이 활성화됩니다.";
+    return;
+  }
+
+  if (!selected) {
+    el.gameFeedback.textContent = "선택을 다시 시도해 주세요.";
+    return;
+  }
+
+  const alreadySolved = state.game.solved.has(mission.id);
+  if (selected.isCorrect) {
+    const scoreText = state.game.lastAwardedPoints > 0
+      ? `+${state.game.lastAwardedPoints}점 획득`
+      : alreadySolved
+        ? "이미 클리어한 미션입니다."
+        : "정답입니다.";
+    el.gameFeedback.textContent = `${selected.reason} ${scoreText}`;
+  } else {
+    el.gameFeedback.textContent = selected.reason;
+  }
+}
+
+function setGameMission(index) {
+  const total = INTERACTION_GAME_MISSIONS.length;
+  if (total === 0) return;
+  const normalized = ((index % total) + total) % total;
+  state.game.missionIndex = normalized;
+  resetGameMissionAttempt();
+  renderGameMissionTabs();
+  renderGameMission();
+  renderGameStatus();
+}
+
+function onGameOptionSelect(optionId) {
+  const mission = getCurrentGameMission();
+  if (!mission || state.game.answered) return;
+
+  const selected = mission.options.find((option) => option.id === optionId);
+  if (!selected) return;
+
+  state.game.selectedOptionId = selected.id;
+  state.game.answered = true;
+  state.game.lastAwardedPoints = 0;
+
+  if (selected.isCorrect && !state.game.solved.has(mission.id)) {
+    state.game.solved.add(mission.id);
+    state.game.score += GAME_POINTS_PER_CLEAR;
+    state.game.lastAwardedPoints = GAME_POINTS_PER_CLEAR;
+  }
+
+  renderGameMissionTabs();
+  renderGameMission();
+  renderGameStatus();
+}
+
+function styleMissionStructure(viewer, mission) {
+  const mode = mission.structure.mode;
+
+  if (mode === "insulin") {
+    viewer.setStyle({}, { cartoon: { color: "#2f3f56", opacity: 0.15 } });
+    viewer.setStyle({ chain: "A" }, { cartoon: { color: "#22d3ee", opacity: 1, thickness: 0.32 } });
+    viewer.setStyle({ chain: "D" }, { cartoon: { color: "#f59e0b", opacity: 1, thickness: 0.36 } });
+
+    const model = viewer.getModel();
+    const iface = interfaceResidues(model, "A", "D");
+    if (iface.primaryResi.length > 0) {
+      viewer.setStyle(
+        { chain: "A", resi: iface.primaryResi },
+        { stick: { color: "#67e8f9", radius: 0.18 } }
+      );
+    }
+    if (iface.partnerResi.length > 0) {
+      viewer.setStyle(
+        { chain: "D", resi: iface.partnerResi },
+        { stick: { color: "#fcd34d", radius: 0.18 } }
+      );
+    }
+
+    return {
+      or: [{ chain: "A" }, { chain: "D" }]
+    };
+  }
+
+  if (mode === "crispr") {
+    viewer.setStyle({}, { cartoon: { color: "#364153", opacity: 0.1 } });
+    viewer.setStyle({ chain: "A" }, { cartoon: { color: "#22d3ee", opacity: 1, thickness: 0.32 } });
+    viewer.setStyle({ chain: "B" }, { stick: { color: "#f472b6", radius: 0.16 } });
+    viewer.setStyle({ chain: "C" }, { stick: { color: "#facc15", radius: 0.16 } });
+    viewer.setStyle({ chain: "D" }, { stick: { color: "#fb923c", radius: 0.16 } });
+
+    const model = viewer.getModel();
+    const dnaIface = interfaceResidues(model, "A", "C");
+    if (dnaIface.primaryResi.length > 0) {
+      viewer.setStyle(
+        { chain: "A", resi: dnaIface.primaryResi },
+        { stick: { color: "#06b6d4", radius: 0.16 } }
+      );
+    }
+
+    return {
+      or: [{ chain: "A" }, { chain: "B" }, { chain: "C" }, { chain: "D" }]
+    };
+  }
+
+  viewer.setStyle({}, { cartoon: { color: "#7f8ea6", opacity: 1 } });
+  return {};
+}
+
+async function loadMissionStructure(mission, requestToken) {
+  const viewer = ensureViewer();
+  if (!currentRequestIs(requestToken)) return;
+
+  const { pdbId, title, hint } = mission.structure;
+  el.foldMeta.textContent = `${title} 로딩 중...`;
+  el.foldHint.textContent = "PDB 복합체 파일을 내려받아 표시하는 중입니다.";
+
+  try {
+    const url = `https://files.rcsb.org/download/${pdbId}.cif`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`PDB 복합체 다운로드 실패 (${response.status})`);
+    const cifText = await response.text();
+    if (!currentRequestIs(requestToken)) return;
+
+    viewer.clear();
+    viewer.addModel(cifText, "cif");
+
+    const zoomSelection = styleMissionStructure(viewer, mission);
+    viewer.zoomTo(zoomSelection);
+    viewer.resize();
+    viewer.render();
+
+    state.structureMode = "complex";
+    state.complexContext = {
+      missionId: mission.id,
+      pdbId
+    };
+
+    el.foldMeta.textContent = title;
+    el.foldHint.textContent = `${hint} 출처: ${mission.structure.sourceUrl}`;
+  } catch (error) {
+    console.error(error);
+    if (!currentRequestIs(requestToken)) return;
+    el.foldMeta.textContent = "미션 구조 로딩 실패";
+    el.foldHint.textContent = "PDB 네트워크 연결 또는 파일 로딩 상태를 확인하고 다시 시도하세요.";
+  }
+}
+
+function setupGameEvents() {
+  if (!el.gameMissionTabs || !el.gameOptions) return;
+
+  renderGameMissionTabs();
+  renderGameMission();
+  renderGameStatus();
+
+  el.gameMissionTabs.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-game-mission-index]");
+    if (!button) return;
+    const index = Number(button.dataset.gameMissionIndex);
+    if (!Number.isFinite(index)) return;
+    setGameMission(index);
+  });
+
+  el.gameOptions.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-game-option-id]");
+    if (!button) return;
+    const optionId = button.dataset.gameOptionId;
+    if (!optionId) return;
+    onGameOptionSelect(optionId);
+  });
+
+  el.gameLoad3d.addEventListener("click", () => {
+    const mission = getCurrentGameMission();
+    if (!mission) return;
+
+    const selected = mission.options.find((option) => option.id === state.game.selectedOptionId);
+    if (!state.game.answered || !selected?.isCorrect) {
+      el.gameFeedback.textContent = "먼저 정답 보기를 선택해 주세요.";
+      return;
+    }
+
+    const requestToken = ++state.requestToken;
+    loadMissionStructure(mission, requestToken);
+  });
+
+  el.gameReset.addEventListener("click", () => {
+    resetGameMissionAttempt();
+    renderGameMission();
+    renderGameStatus();
+  });
+
+  el.gameNext.addEventListener("click", () => {
+    setGameMission(state.game.missionIndex + 1);
+  });
 }
 
 function setPipelineLoading(gene) {
@@ -949,6 +1343,7 @@ async function onGeneChange() {
 function setupEvents() {
   el.select.addEventListener("change", onGeneChange);
   setupFlowInteractions();
+  setupGameEvents();
 
   el.interactionList.addEventListener("click", (event) => {
     const button = event.target.closest(".interaction-btn[data-partner-accession]");
